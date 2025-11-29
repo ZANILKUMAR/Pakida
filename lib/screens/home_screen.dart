@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../widgets/tool_card.dart';
 import '../theme/app_theme.dart';
 import 'dice_roller_screen.dart';
@@ -45,15 +46,36 @@ class HomeScreen extends StatelessWidget {
                 child: Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(12),
+                      padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
                         gradient: AppTheme.primaryGradient,
                         borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppTheme.primaryColor.withOpacity(0.4),
+                            blurRadius: 12,
+                            spreadRadius: 2,
+                          ),
+                        ],
                       ),
-                      child: const Icon(
-                        Icons.casino,
-                        color: Colors.white,
-                        size: 28,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: SvgPicture.asset(
+                          'assets/images/pakida_logo.svg',
+                          width: 48,
+                          height: 48,
+                          colorFilter: const ColorFilter.mode(
+                            Colors.white,
+                            BlendMode.srcIn,
+                          ),
+                          placeholderBuilder: (context) {
+                            return const Icon(
+                              Icons.casino,
+                              color: Colors.white,
+                              size: 32,
+                            );
+                          },
+                        ),
                       ),
                     ),
                     const SizedBox(width: 16),

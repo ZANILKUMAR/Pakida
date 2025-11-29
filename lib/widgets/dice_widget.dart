@@ -1,8 +1,5 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import '../models/dice_model.dart';
-import '../theme/app_theme.dart';
 import 'dice_shape_icon.dart';
 
 class DiceWidget extends StatelessWidget {
@@ -24,9 +21,7 @@ class DiceWidget extends StatelessWidget {
 
     return GestureDetector(
       onTap: isRolling ? null : onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOutCubic,
+      child: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
@@ -37,8 +32,8 @@ class DiceWidget extends StatelessWidget {
           boxShadow: [
             BoxShadow(
               color: style.shadowColor,
-              blurRadius: isRolling ? 25 : 15,
-              spreadRadius: 0,
+              blurRadius: isRolling ? 30 : 15,
+              spreadRadius: isRolling ? 2 : 0,
               offset: const Offset(0, 8),
             ),
           ],
@@ -51,27 +46,7 @@ class DiceWidget extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           child: Stack(
             children: [
-              // Floating particles background
-              if (!isRolling)
-                ...List.generate(3, (index) {
-                  final alignment = _particleAlignments[index];
-                  final random = Random(dice.type.sides + index);
-                  return Align(
-                    alignment: alignment,
-                    child: Icon(
-                      Icons.auto_awesome,
-                      size: 8 + random.nextInt(5).toDouble(),
-                      color: style.particleColor.withOpacity(0.1),
-                    )
-                        .animate(onPlay: (controller) => controller.repeat(reverse: true))
-                        .scale(
-                          begin: const Offset(0.8, 0.8),
-                          end: const Offset(1.05, 1.05),
-                          duration: const Duration(milliseconds: 1800),
-                        )
-                        .fadeIn(duration: const Duration(milliseconds: 800)),
-                  );
-                }),
+              // Floating particles background - SIMPLIFIED
               // Main content
               Container(
                 padding: const EdgeInsets.all(14),
@@ -107,53 +82,21 @@ class DiceWidget extends StatelessWidget {
                           ],
                         ),
                         if (onTypeChanged != null && !isRolling)
-                          SizedBox(
+                          Container(
                             width: 28,
                             height: 28,
-                            child: PopupMenuButton<DiceType>(
-                              tooltip: 'Change dice',
-                              elevation: 12,
-                              color: const Color(0xFF1F2937),
-                              onSelected: onTypeChanged,
-                              itemBuilder: (context) => DiceType.values
-                                  .map(
-                                    (type) => PopupMenuItem<DiceType>(
-                                      value: type,
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          SizedBox(
-                                            width: 24,
-                                            height: 24,
-                                            child: DiceShapeIcon(
-                                              type: type,
-                                              size: 20,
-                                              showValue: true,
-                                            ),
-                                          ),
-                                          const SizedBox(width: 8),
-                                          Text(type.label),
-                                        ],
-                                      ),
-                                    ),
-                                  )
-                                  .toList(),
-                              child: Container(
-                                padding: const EdgeInsets.all(3),
-                                decoration: BoxDecoration(
-                                  color: Colors.black.withOpacity(0.25),
-                                  borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(
-                                    color: Colors.white.withOpacity(0.15),
-                                    width: 0.5,
-                                  ),
-                                ),
-                                child: const Icon(
-                                  Icons.change_circle_outlined,
-                                  size: 14,
-                                  color: Colors.white,
-                                ),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.25),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: Colors.white.withOpacity(0.15),
+                                width: 0.5,
                               ),
+                            ),
+                            child: const Icon(
+                              Icons.change_circle_outlined,
+                              size: 14,
+                              color: Colors.white,
                             ),
                           ),
                       ],
@@ -169,17 +112,13 @@ class DiceWidget extends StatelessWidget {
                     // Bottom status
                     Align(
                       alignment: Alignment.bottomCenter,
-                      child: AnimatedOpacity(
-                        opacity: dice.value == null ? 0.5 : 0.9,
-                        duration: const Duration(milliseconds: 250),
-                        child: Text(
-                          dice.value == null ? 'Tap' : '${dice.value}',
-                          style: TextStyle(
-                            fontSize: 10,
-                            color: Colors.white70,
-                            fontWeight: dice.value != null ? FontWeight.bold : FontWeight.normal,
-                            letterSpacing: 0.2,
-                          ),
+                      child: Text(
+                        dice.value == null ? 'Tap' : '${dice.value}',
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: Colors.white70,
+                          fontWeight: dice.value != null ? FontWeight.bold : FontWeight.normal,
+                          letterSpacing: 0.2,
                         ),
                       ),
                     ),
@@ -189,12 +128,7 @@ class DiceWidget extends StatelessWidget {
             ],
           ),
         ),
-      )
-          .animate(target: isRolling ? 1 : 0)
-          .shake(
-            duration: const Duration(milliseconds: 300),
-            hz: 4,
-          ),
+      ),
     );
   }
 }
@@ -209,11 +143,34 @@ class _RollingIndicator extends StatelessWidget {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        DiceShapeIcon(
-          type: type,
-          size: 56,
-          isRolling: true,
-          showValue: true,
+        SizedBox(
+          height: 70,
+          width: 70,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              // Glow effect
+              Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.white.withOpacity(0.3),
+                      blurRadius: 20,
+                      spreadRadius: 5,
+                    ),
+                  ],
+                ),
+              ),
+              // Rolling icon
+              DiceShapeIcon(
+                type: type,
+                size: 56,
+                isRolling: true,
+                showValue: true,
+              ),
+            ],
+          ),
         ),
         const SizedBox(height: 6),
         const Text(
@@ -224,9 +181,7 @@ class _RollingIndicator extends StatelessWidget {
             letterSpacing: 0.5,
             fontWeight: FontWeight.w500,
           ),
-        )
-            .animate(onPlay: (controller) => controller.repeat(reverse: true))
-            .fadeIn(duration: const Duration(milliseconds: 600)),
+        ),
       ],
     );
   }
@@ -371,9 +326,5 @@ class _DiceVisualStyle {
   }
 }
 
-const List<Alignment> _particleAlignments = [
-  Alignment(-0.8, -0.8),
-  Alignment(0.8, -0.8),
-  Alignment(0, 0.9),
-];
+
 

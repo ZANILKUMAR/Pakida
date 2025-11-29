@@ -1,15 +1,20 @@
 import 'dart:math';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
+import 'package:audioplayers/audioplayers.dart';
 import '../models/dice_model.dart';
 
 class DiceProvider with ChangeNotifier {
-  DiceProvider() {
-    _ensureDefaultDice();
-  }
-
-  final List<Dice> _diceList = [];
+  late final List<Dice> _diceList;
   bool _isRolling = false;
   final Random _random = Random();
+  late AudioPlayer _audioPlayer;
+
+  DiceProvider() {
+    _diceList = [];
+    _initAudio();
+    _ensureDefaultDice();
+  }
 
   List<Dice> get diceList => List.unmodifiable(_diceList);
   bool get isRolling => _isRolling;
@@ -18,6 +23,26 @@ class DiceProvider with ChangeNotifier {
   int get totalSum => _diceList
       .where((dice) => dice.value != null)
       .fold(0, (sum, dice) => sum + (dice.value ?? 0));
+
+  void _initAudio() {
+    _audioPlayer = AudioPlayer();
+  }
+
+  Future<void> _playDiceSound() async {
+    try {
+      await _audioPlayer.play(AssetSource('sounds/dice_roll.mp3'));
+    } catch (e) {
+      debugPrint('Error playing sound: $e');
+    }
+  }
+
+  Future<void> _triggerVibration() async {
+    try {
+      await HapticFeedback.mediumImpact();
+    } catch (e) {
+      debugPrint('Error triggering vibration: $e');
+    }
+  }
 
   void _ensureDefaultDice() {
     if (_diceList.isEmpty) {
@@ -58,6 +83,9 @@ class DiceProvider with ChangeNotifier {
     _isRolling = true;
     notifyListeners();
     
+    // Trigger initial vibration
+    await _triggerVibration();
+    
     // Set all dice to rolling state
     for (int i = 0; i < _diceList.length; i++) {
       _diceList[i] = Dice(
@@ -67,6 +95,9 @@ class DiceProvider with ChangeNotifier {
       );
     }
     notifyListeners();
+
+    // Play rolling sound at start
+    await _playDiceSound();
 
     // Simulate rolling animation duration
     await Future.delayed(const Duration(milliseconds: 1200));
@@ -82,12 +113,19 @@ class DiceProvider with ChangeNotifier {
       );
     }
 
+    // Trigger final vibration and sound
+    await _triggerVibration();
+    await _playDiceSound();
+
     _isRolling = false;
     notifyListeners();
   }
 
   Future<void> rollSingleDice(int index) async {
     if (index < 0 || index >= _diceList.length || _isRolling) return;
+
+    // Trigger vibration
+    await _triggerVibration();
 
     final currentDice = _diceList[index];
     _diceList[index] = Dice(
@@ -96,6 +134,9 @@ class DiceProvider with ChangeNotifier {
       isRolling: true,
     );
     notifyListeners();
+
+    // Play sound
+    await _playDiceSound();
 
     await Future.delayed(const Duration(milliseconds: 800));
 
@@ -106,6 +147,10 @@ class DiceProvider with ChangeNotifier {
       value: value,
       isRolling: false,
     );
+
+    // Final feedback
+    await _triggerVibration();
+
     notifyListeners();
   }
 }

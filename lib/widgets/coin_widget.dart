@@ -16,7 +16,7 @@ class CoinWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: coin.isFlipping ? null : onTap,
       child: Container(
         decoration: BoxDecoration(
           gradient: AppTheme.accentGradient,
@@ -24,7 +24,7 @@ class CoinWidget extends StatelessWidget {
           boxShadow: [
             BoxShadow(
               color: AppTheme.accentColor.withOpacity(0.3),
-              blurRadius: 15,
+              blurRadius: coin.isFlipping ? 25 : 15,
               offset: const Offset(0, 8),
             ),
           ],
@@ -32,7 +32,7 @@ class CoinWidget extends StatelessWidget {
         child: Material(
           color: Colors.transparent,
           child: InkWell(
-            onTap: onTap,
+            onTap: coin.isFlipping ? null : onTap,
             borderRadius: BorderRadius.circular(20),
             child: Container(
               alignment: Alignment.center,
@@ -41,8 +41,8 @@ class CoinWidget extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Container(
-                          width: 80,
-                          height: 80,
+                          width: 100,
+                          height: 100,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             gradient: LinearGradient(
@@ -61,28 +61,29 @@ class CoinWidget extends StatelessWidget {
                           child: const Icon(
                             Icons.flip,
                             color: Colors.white,
-                            size: 40,
+                            size: 50,
                           ),
                         )
                             .animate(onPlay: (controller) => controller.repeat())
                             .rotate(
-                              duration: 500.ms,
+                              duration: 600.ms,
                               begin: 0,
                               end: 0.5,
                               curve: Curves.easeInOut,
                             )
                             .scale(
-                              duration: 500.ms,
+                              duration: 600.ms,
                               begin: const Offset(1, 1),
-                              end: const Offset(1.1, 0.9),
+                              end: const Offset(1.15, 0.85),
                               curve: Curves.easeInOut,
                             ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 16),
                         Text(
                           'Flipping...',
                           style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.white.withOpacity(0.9),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white.withOpacity(0.95),
                           ),
                         ),
                       ],
@@ -92,28 +93,47 @@ class CoinWidget extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Container(
-                              width: 80,
-                              height: 80,
+                              width: 100,
+                              height: 100,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: Colors.white.withOpacity(0.2),
-                                border: Border.all(
-                                  color: Colors.white.withOpacity(0.5),
-                                  width: 3,
+                                gradient: LinearGradient(
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                  colors: [
+                                    Colors.amber.shade400,
+                                    Colors.amber.shade600,
+                                  ],
                                 ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.3),
+                                    blurRadius: 12,
+                                    offset: const Offset(0, 5),
+                                  ),
+                                ],
                               ),
-                              child: Icon(
-                                Icons.monetization_on,
-                                color: Colors.white.withOpacity(0.7),
-                                size: 50,
+                              child: const Icon(
+                                Icons.currency_exchange,
+                                color: Colors.white,
+                                size: 60,
                               ),
                             ),
                             const SizedBox(height: 12),
                             Text(
+                              'Flip the Coin',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
                               'Tap to flip',
                               style: TextStyle(
                                 fontSize: 12,
-                                color: Colors.white.withOpacity(0.9),
+                                color: Colors.white.withOpacity(0.8),
                               ),
                             ),
                           ],
@@ -122,15 +142,15 @@ class CoinWidget extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Container(
-                              width: 80,
-                              height: 80,
+                              width: 90,
+                              height: 90,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 color: Colors.white,
                                 boxShadow: [
                                   BoxShadow(
                                     color: Colors.black.withOpacity(0.2),
-                                    blurRadius: 10,
+                                    blurRadius: 12,
                                     offset: const Offset(0, 5),
                                   ),
                                 ],
@@ -142,24 +162,24 @@ class CoinWidget extends StatelessWidget {
                                 color: coin.result == CoinResult.heads
                                     ? Colors.amber.shade700
                                     : Colors.blue.shade700,
-                                size: 50,
+                                size: 55,
                               ),
                             )
                                 .animate()
                                 .scale(
-                                  duration: 400.ms,
-                                  begin: const Offset(0.5, 0.5),
+                                  duration: 500.ms,
+                                  begin: const Offset(0.4, 0.4),
                                   end: const Offset(1, 1),
                                   curve: Curves.elasticOut,
                                 )
                                 .fadeIn(duration: 400.ms),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: 16),
                             Text(
                               coin.result == CoinResult.heads
                                   ? 'Heads'
                                   : 'Tails',
                               style: const TextStyle(
-                                fontSize: 16,
+                                fontSize: 18,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
                               ),
@@ -167,11 +187,19 @@ class CoinWidget extends StatelessWidget {
                                 .animate()
                                 .fadeIn(duration: 300.ms, delay: 200.ms)
                                 .slideY(
-                                  begin: 0.2,
+                                  begin: 0.3,
                                   end: 0,
                                   duration: 300.ms,
                                   delay: 200.ms,
                                 ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Flip #${coin.flipCount}',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Colors.white.withOpacity(0.7),
+                              ),
+                            ),
                           ],
                         ),
             ),
@@ -179,9 +207,7 @@ class CoinWidget extends StatelessWidget {
         ),
       )
           .animate(target: coin.isFlipping ? 1 : 0)
-          .shake(duration: 300.ms, hz: 6, curve: Curves.easeInOut),
+          .shake(duration: 400.ms, hz: 5, curve: Curves.easeInOut),
     );
   }
 }
-
-
