@@ -36,6 +36,50 @@ class _NumberDialScreenState extends State<NumberDialScreen>
     super.dispose();
   }
 
+  bool _validateAndSpin(BuildContext context, NumberDialProvider provider) {
+    final min = int.tryParse(_minController.text);
+    final max = int.tryParse(_maxController.text);
+    
+    if (_minController.text.isEmpty || _maxController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Please enter both minimum and maximum values'),
+          backgroundColor: Colors.red.shade600,
+          duration: const Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return false;
+    }
+    
+    if (min == null || max == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Please enter valid numbers'),
+          backgroundColor: Colors.red.shade600,
+          duration: const Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return false;
+    }
+    
+    if (min >= max) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Maximum must be greater than minimum'),
+          backgroundColor: Colors.red.shade600,
+          duration: const Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return false;
+    }
+    
+    provider.spin();
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     final numberDialProvider = Provider.of<NumberDialProvider>(context);
@@ -242,7 +286,7 @@ class _NumberDialScreenState extends State<NumberDialScreen>
                       GestureDetector(
                         onTap: numberDialProvider.isSpinning
                             ? null
-                            : () => numberDialProvider.spin(),
+                            : () => _validateAndSpin(context, numberDialProvider),
                         child: Container(
                           width: 280,
                           height: 280,
@@ -367,48 +411,7 @@ class _NumberDialScreenState extends State<NumberDialScreen>
                   child: ElevatedButton(
                     onPressed: numberDialProvider.isSpinning
                         ? null
-                        : () {
-                            final min = int.tryParse(_minController.text);
-                            final max = int.tryParse(_maxController.text);
-                            
-                            if (_minController.text.isEmpty || _maxController.text.isEmpty) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: const Text('Please enter both minimum and maximum values'),
-                                  backgroundColor: Colors.red.shade600,
-                                  duration: const Duration(seconds: 2),
-                                  behavior: SnackBarBehavior.floating,
-                                ),
-                              );
-                              return;
-                            }
-                            
-                            if (min == null || max == null) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: const Text('Please enter valid numbers'),
-                                  backgroundColor: Colors.red.shade600,
-                                  duration: const Duration(seconds: 2),
-                                  behavior: SnackBarBehavior.floating,
-                                ),
-                              );
-                              return;
-                            }
-                            
-                            if (min >= max) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: const Text('Maximum must be greater than minimum'),
-                                  backgroundColor: Colors.red.shade600,
-                                  duration: const Duration(seconds: 2),
-                                  behavior: SnackBarBehavior.floating,
-                                ),
-                              );
-                              return;
-                            }
-                            
-                            numberDialProvider.spin();
-                          },
+                        : () => _validateAndSpin(context, numberDialProvider),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF10B981),
                       foregroundColor: Colors.white,

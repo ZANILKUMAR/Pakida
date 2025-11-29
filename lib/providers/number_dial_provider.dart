@@ -7,7 +7,7 @@ import '../models/number_dial_model.dart';
 import 'settings_provider.dart';
 
 class NumberDialProvider with ChangeNotifier {
-  NumberDial _numberDial = NumberDial(min: 1, max: 100, currentValue: 50);
+  NumberDial _numberDial = NumberDial(min: 1, max: 100, currentValue: 0);
   bool _isSpinning = false;
   late AudioPlayer _audioPlayer;
   final SettingsProvider _settingsProvider;
