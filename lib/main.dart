@@ -20,10 +20,28 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => SettingsProvider()),
-        ChangeNotifierProvider(create: (_) => DiceProvider()),
+        ChangeNotifierProxyProvider<SettingsProvider, DiceProvider>(
+          create: (context) => DiceProvider(
+            Provider.of<SettingsProvider>(context, listen: false),
+          ),
+          update: (context, settings, previous) => 
+            previous ?? DiceProvider(settings),
+        ),
         ChangeNotifierProvider(create: (_) => CoinProvider()),
-        ChangeNotifierProvider(create: (_) => NumberDialProvider()),
-        ChangeNotifierProvider(create: (_) => SpinnerProvider()),
+        ChangeNotifierProxyProvider<SettingsProvider, NumberDialProvider>(
+          create: (context) => NumberDialProvider(
+            Provider.of<SettingsProvider>(context, listen: false),
+          ),
+          update: (context, settings, previous) => 
+            previous ?? NumberDialProvider(settings),
+        ),
+        ChangeNotifierProxyProvider<SettingsProvider, SpinnerProvider>(
+          create: (context) => SpinnerProvider(
+            Provider.of<SettingsProvider>(context, listen: false),
+          ),
+          update: (context, settings, previous) => 
+            previous ?? SpinnerProvider(settings),
+        ),
       ],
       child: Consumer<SettingsProvider>(
         builder: (context, settings, _) {

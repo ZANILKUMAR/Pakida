@@ -14,6 +14,7 @@ dependencies:
   flutter_animate: ^4.5.0
   audioplayers: ^5.2.1
   flutter_svg: ^2.0.0
+  vibration: ^2.0.0
 
 dev_dependencies:
   flutter_test:
@@ -28,14 +29,20 @@ flutter:
     - assets/images/
 
 flutter_launcher_icons:
-  image_path: "assets/images/pakida_logo.png"
-  android:
-    notification_icon: "notification_icon"
+  android: true
   ios: true
+  image_path: "assets/images/pakida_logo.png"
+  min_sdk_android: 21
+  web:
+    generate: true
+    image_path: "assets/images/pakida_logo.png"
   windows:
-    window_icon: "assets/images/pakida_logo.png"
+    generate: true
+    image_path: "assets/images/pakida_logo.png"
   macos:
-    categories:
-      - GAMES
+    generate: true
+    image_path: "assets/images/pakida_logo.png"
+  adaptive_icon_background: "#6366F1"
+  adaptive_icon_foreground: "assets/images/pakida_logo.png"
 
 

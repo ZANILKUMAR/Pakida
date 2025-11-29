@@ -5,6 +5,8 @@ import '../models/coin_model.dart';
 class CoinProvider with ChangeNotifier {
   late Coin _selectedCoin;
   bool _isFlipping = false;
+  Function? _onFlipStart;
+  Function? _onFlipEnd;
 
   CoinProvider() {
     _ensureDefaultCoin();
@@ -15,6 +17,11 @@ class CoinProvider with ChangeNotifier {
 
   int get headsCount => _selectedCoin.headsCount;
   int get tailsCount => _selectedCoin.tailsCount;
+
+  void setFlipCallbacks(Function onFlipStart, Function onFlipEnd) {
+    _onFlipStart = onFlipStart;
+    _onFlipEnd = onFlipEnd;
+  }
 
   void _ensureDefaultCoin() {
     _selectedCoin = Coin();
@@ -42,6 +49,8 @@ class CoinProvider with ChangeNotifier {
     );
     notifyListeners();
 
+    _onFlipStart?.call();
+
     // Simulate flipping animation duration
     await Future.delayed(const Duration(milliseconds: 1800));
 
@@ -65,6 +74,8 @@ class CoinProvider with ChangeNotifier {
 
     _isFlipping = false;
     notifyListeners();
+
+    _onFlipEnd?.call(result);
   }
 }
 

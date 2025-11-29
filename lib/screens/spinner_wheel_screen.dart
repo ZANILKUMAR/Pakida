@@ -122,10 +122,15 @@ class _SpinnerWheelScreenState extends State<SpinnerWheelScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            SpinnerWheel(
-                              segments: spinnerProvider.segments,
-                              isSpinning: spinnerProvider.isSpinning,
-                              selectedSegment: spinnerProvider.selectedSegment,
+                            GestureDetector(
+                              onTap: spinnerProvider.isSpinning
+                                  ? null
+                                  : () => spinnerProvider.spin(),
+                              child: SpinnerWheel(
+                                segments: spinnerProvider.segments,
+                                isSpinning: spinnerProvider.isSpinning,
+                                selectedSegment: spinnerProvider.selectedSegment,
+                              ),
                             )
                                 .animate()
                                 .fadeIn(duration: 400.ms)
@@ -180,138 +185,366 @@ class _SpinnerWheelScreenState extends State<SpinnerWheelScreen> {
     
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final TextEditingController labelController = TextEditingController();
-    Color selectedColor = AppTheme.primaryColor;
+    Color selectedColor = const Color(0xFF6366F1);
+    bool showAllColors = false;
 
     showDialog(
       context: context,
-      barrierDismissible: false,
+      barrierDismissible: true,
       builder: (dialogContext) => StatefulBuilder(
         builder: (sbContext, setState) {
-          return AlertDialog(
-            backgroundColor: isDark ? AppTheme.cardColor : Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            title: const Text('Add New Entry'),
-            content: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  TextField(
-                    controller: labelController,
-                    decoration: InputDecoration(
-                      labelText: 'Entry Name',
-                      filled: true,
-                      fillColor: isDark
-                          ? AppTheme.surfaceColor
-                          : Colors.grey.shade100,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
-                      hintText: 'e.g., Pizza, Burger, Pasta',
-                    ),
-                    autofocus: true,
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    'Choose Color',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      color: isDark ? Colors.white70 : Colors.grey.shade700,
-                      fontSize: 14,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 12,
-                    children: [
-                      const Color(0xFF6366F1),
-                      const Color(0xFFEC4899),
-                      const Color(0xFFF59E0B),
-                      const Color(0xFF10B981),
-                      const Color(0xFF3B82F6),
-                      const Color(0xFFA855F7),
-                      const Color(0xFFEF4444),
-                      const Color(0xFF14B8A6),
-                    ]
-                        .map((color) {
-                          return GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                selectedColor = color;
-                              });
-                            },
-                            child: Container(
-                              width: 50,
-                              height: 50,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: color,
-                                border: Border.all(
-                                  color: selectedColor == color
-                                      ? Colors.white
-                                      : Colors.transparent,
-                                  width: 3,
-                                ),
-                                boxShadow: selectedColor == color
-                                    ? [
-                                        BoxShadow(
-                                          color: color.withOpacity(0.5),
-                                          blurRadius: 12,
-                                          spreadRadius: 2,
-                                        ),
-                                      ]
-                                    : [],
-                              ),
-                            ),
-                          );
-                        })
-                        .toList(),
+          return Dialog(
+            backgroundColor: Colors.transparent,
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 400),
+              decoration: BoxDecoration(
+                color: isDark ? AppTheme.cardColor : Colors.white,
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
                   ),
                 ],
               ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(sbContext),
-                child: const Text('Cancel'),
-              ),
-              ElevatedButton.icon(
-                onPressed: () {
-                  final text = labelController.text.trim();
-                  if (text.isEmpty) {
-                    ScaffoldMessenger.of(sbContext).showSnackBar(
-                      const SnackBar(
-                        content: Text('Please enter a name'),
-                        duration: Duration(milliseconds: 1500),
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Header
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            gradient: AppTheme.accentGradient,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.add_circle_outline,
+                            color: Colors.white,
+                            size: 24,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Text(
+                            'Add New Entry',
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: isDark ? Colors.white : AppTheme.backgroundColor,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () => Navigator.pop(sbContext),
+                          icon: Icon(
+                            Icons.close,
+                            color: isDark ? Colors.white70 : Colors.grey.shade600,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    
+                    // Entry Name Input
+                    Text(
+                      'Entry Name',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: isDark ? Colors.white : AppTheme.backgroundColor,
+                        fontSize: 14,
                       ),
-                    );
-                    return;
-                  }
-                  provider.addSegment(
-                    SpinnerSegment(
-                      label: text,
-                      color: selectedColor.withOpacity(0.8),
                     ),
-                  );
-                  Navigator.pop(sbContext);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Added: $text'),
-                      duration: const Duration(milliseconds: 1500),
-                      behavior: SnackBarBehavior.floating,
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: labelController,
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: isDark
+                            ? AppTheme.surfaceColor
+                            : Colors.grey.shade100,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: isDark ? Colors.white10 : Colors.grey.shade300,
+                            width: 1,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: AppTheme.primaryColor,
+                            width: 2,
+                          ),
+                        ),
+                        hintText: 'e.g., Pizza, John, Cinema,100',
+                        hintStyle: TextStyle(
+                          color: isDark ? Colors.white30 : Colors.grey.shade400,
+                        ),
+                        prefixIcon: Icon(
+                          Icons.label_outline,
+                          color: isDark ? Colors.white54 : Colors.grey.shade600,
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 16,
+                        ),
+                      ),
+                      style: TextStyle(
+                        color: isDark ? Colors.white : AppTheme.backgroundColor,
+                        fontSize: 16,
+                      ),
+                      autofocus: true,
                     ),
-                  );
-                },
-                icon: const Icon(Icons.add),
-                label: const Text('Add Entry'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.primaryColor,
+                    const SizedBox(height: 24),
+                    
+                    // Color Selection
+                    Text(
+                      'Choose Color',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: isDark ? Colors.white : AppTheme.backgroundColor,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          showAllColors = !showAllColors;
+                        });
+                      },
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                        child: showAllColors
+                            ? Wrap(
+                                spacing: 10,
+                                runSpacing: 10,
+                                children: [
+                                  const Color(0xFF6366F1),
+                                  const Color(0xFFEC4899),
+                                  const Color(0xFFF59E0B),
+                                  const Color(0xFF10B981),
+                                  const Color(0xFF3B82F6),
+                                  const Color(0xFFA855F7),
+                                  const Color(0xFFEF4444),
+                                  const Color(0xFF14B8A6),
+                                  const Color(0xFFF97316),
+                                  const Color(0xFF8B5CF6),
+                                  const Color(0xFF06B6D4),
+                                  const Color(0xFFFBBF24),
+                                ]
+                                    .map((color) {
+                                      final isSelected = selectedColor == color;
+                                      return GestureDetector(
+                                        onTap: () {
+                                          setState(() {
+                                            selectedColor = color;
+                                            showAllColors = false;
+                                          });
+                                        },
+                                        child: AnimatedContainer(
+                                          duration: const Duration(milliseconds: 200),
+                                          width: isSelected ? 56 : 48,
+                                          height: isSelected ? 56 : 48,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: color,
+                                            border: Border.all(
+                                              color: isSelected
+                                                  ? (isDark ? Colors.white : AppTheme.backgroundColor)
+                                                  : Colors.transparent,
+                                              width: 3,
+                                            ),
+                                            boxShadow: [
+                                              if (isSelected)
+                                                BoxShadow(
+                                                  color: color.withOpacity(0.5),
+                                                  blurRadius: 12,
+                                                  spreadRadius: 2,
+                                                ),
+                                            ],
+                                          ),
+                                          child: isSelected
+                                              ? const Icon(
+                                                  Icons.check,
+                                                  color: Colors.white,
+                                                  size: 24,
+                                                )
+                                              : null,
+                                        ),
+                                      );
+                                    })
+                                    .toList(),
+                              )
+                            : Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  color: isDark
+                                      ? AppTheme.surfaceColor
+                                      : Colors.grey.shade100,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: isDark ? Colors.white10 : Colors.grey.shade300,
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      width: 48,
+                                      height: 48,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: selectedColor,
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: selectedColor.withOpacity(0.4),
+                                            blurRadius: 8,
+                                            spreadRadius: 1,
+                                          ),
+                                        ],
+                                      ),
+                                      child: const Icon(
+                                        Icons.check,
+                                        color: Colors.white,
+                                        size: 24,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Text(
+                                        'Tap to choose color',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color: isDark ? Colors.white70 : Colors.grey.shade600,
+                                        ),
+                                      ),
+                                    ),
+                                    Icon(
+                                      Icons.palette,
+                                      color: isDark ? Colors.white54 : Colors.grey.shade600,
+                                    ),
+                                    const SizedBox(width: 8),
+                                  ],
+                                ),
+                              ),
+                      ),
+                    ),
+                    const SizedBox(height: 28),
+                    
+                    // Action Buttons
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () => Navigator.pop(sbContext),
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              side: BorderSide(
+                                color: isDark ? Colors.white24 : Colors.grey.shade300,
+                                width: 1.5,
+                              ),
+                            ),
+                            child: Text(
+                              'Cancel',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: isDark ? Colors.white70 : Colors.grey.shade700,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          flex: 2,
+                          child: ElevatedButton.icon(
+                            onPressed: () {
+                              final text = labelController.text.trim();
+                              if (text.isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: const Row(
+                                      children: [
+                                        Icon(Icons.error_outline, color: Colors.white),
+                                        SizedBox(width: 12),
+                                        Text('Please enter a name'),
+                                      ],
+                                    ),
+                                    backgroundColor: Colors.red.shade600,
+                                    duration: const Duration(milliseconds: 2000),
+                                    behavior: SnackBarBehavior.floating,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                  ),
+                                );
+                                return;
+                              }
+                              provider.addSegment(
+                                SpinnerSegment(
+                                  label: text,
+                                  color: selectedColor,
+                                ),
+                              );
+                              Navigator.pop(sbContext);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Row(
+                                    children: [
+                                      const Icon(Icons.check_circle, color: Colors.white),
+                                      const SizedBox(width: 12),
+                                      Expanded(child: Text('Added: $text')),
+                                    ],
+                                  ),
+                                  backgroundColor: Colors.green.shade600,
+                                  duration: const Duration(milliseconds: 2000),
+                                  behavior: SnackBarBehavior.floating,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                              );
+                            },
+                            icon: const Icon(Icons.add_circle, size: 20),
+                            label: const Text(
+                              'Add Entry',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppTheme.accentColor,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              elevation: 2,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
-            ],
+            ),
           );
         },
       ),
@@ -335,13 +568,14 @@ class _SpinnerWheelScreenState extends State<SpinnerWheelScreen> {
           builder: (consumerContext, provider, _) {
             return StatefulBuilder(
               builder: (sbContext, setState) {
-                return SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // Header
-                      Container(
-                        padding: const EdgeInsets.all(16),
+                return SafeArea(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Header
+                        Container(
+                          padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
                         decoration: BoxDecoration(
                           border: Border(
                             bottom: BorderSide(
@@ -352,33 +586,36 @@ class _SpinnerWheelScreenState extends State<SpinnerWheelScreen> {
                           ),
                         ),
                         child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              'Entries (${provider.segments.length})',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color:
-                                    isDark ? Colors.white : AppTheme.backgroundColor,
+                            Expanded(
+                              child: Text(
+                                'Entries (${provider.segments.length})',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color:
+                                      isDark ? Colors.white : AppTheme.backgroundColor,
+                                ),
                               ),
                             ),
+                            const SizedBox(width: 8),
                             ElevatedButton.icon(
                               onPressed: () {
                                 _onAddButtonPressed(screenContext, provider);
                               },
-                              icon: const Icon(Icons.add),
+                              icon: const Icon(Icons.add, size: 18),
                               label: const Text('Add'),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppTheme.accentColor,
                                 foregroundColor: Colors.white,
                                 padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
+                                  horizontal: 12,
                                   vertical: 8,
                                 ),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8),
                                 ),
+                                visualDensity: VisualDensity.compact,
                               ),
                             ),
                           ],
@@ -493,8 +730,9 @@ class _SpinnerWheelScreenState extends State<SpinnerWheelScreen> {
                             );
                           },
                         ),
-                      const SizedBox(height: 16),
-                    ],
+                        const SizedBox(height: 16),
+                      ],
+                    ),
                   ),
                 );
               },

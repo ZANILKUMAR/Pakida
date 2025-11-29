@@ -52,18 +52,15 @@ class _DiceRollerScreenState extends State<DiceRollerScreen> {
             builder: (context, diceProvider, child) {
               return Column(
                 children: [
-                  // Dice Selector Section
-                  _buildDiceSelectorSection(context, isDark, diceProvider),
-
                   // Large Dice Display Section
                   Expanded(
                     child: _buildLargeDiceDisplay(
                         context, diceProvider, isDark),
                   ),
 
-                  // Action Buttons Section
+                  // Dice Selector + Action Buttons Section
                   if (diceProvider.diceList.isNotEmpty)
-                    _buildActionButtonsSection(context, diceProvider, isDark),
+                    _buildBottomControlsSection(context, diceProvider, isDark),
                 ],
               );
             },
@@ -73,175 +70,175 @@ class _DiceRollerScreenState extends State<DiceRollerScreen> {
     );
   }
 
-  Widget _buildDiceSelectorSection(
-      BuildContext context, bool isDark, DiceProvider diceProvider) {
+  Widget _buildBottomControlsSection(
+      BuildContext context, DiceProvider diceProvider, bool isDark) {
     return Container(
-      margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isDark ? AppTheme.cardColor : AppTheme.lightCard,
-        borderRadius: BorderRadius.circular(16),
+        color: isDark ? AppTheme.surfaceColor : Colors.white,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.1),
             blurRadius: 10,
-            offset: const Offset(0, 5),
+            offset: const Offset(0, -5),
           ),
         ],
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
+          // Dice Type and Quantity Row
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              // Dice Type Selector
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Dice Type',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: isDark
-                            ? Colors.white70
-                            : AppTheme.backgroundColor.withOpacity(0.7),
-                      ),
+                child: GestureDetector(
+                  onTap: () => _showDiceSelectionDialog(context, isDark),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
                     ),
-                    const SizedBox(height: 8),
-                    GestureDetector(
-                      onTap: () => _showDiceSelectionDialog(context, isDark),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 10,
-                        ),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: _getGradientColors(_selectedDiceType),
-                          ),
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
-                              blurRadius: 8,
-                              offset: const Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.casino,
-                              color: Colors.white,
-                              size: 18,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              '${_selectedDiceType.label} (D${_selectedDiceType.sides})',
-                              style: const TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            Icon(
-                              Icons.arrow_drop_down,
-                              color: Colors.white,
-                              size: 18,
-                            ),
-                          ],
-                        ),
-                      ),
-                    )
-                        .animate()
-                        .fadeIn(duration: 400.ms)
-                        .slideX(begin: -0.2, end: 0, duration: 400.ms),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 12),
-              // Quantity Control
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    'Quantity',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: isDark
-                          ? Colors.white70
-                          : AppTheme.backgroundColor.withOpacity(0.7),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Container(
                     decoration: BoxDecoration(
-                      color: isDark ? AppTheme.surfaceColor : Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: AppTheme.primaryColor.withOpacity(0.3),
-                        width: 1,
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: _getGradientColors(_selectedDiceType),
                       ),
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.15),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
                     ),
-                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
                     child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        SizedBox(
-                          width: 34,
-                          height: 34,
-                          child: IconButton(
-                            onPressed: diceProvider.diceCount > 0
-                                ? () {
-                                    diceProvider.removeDice(diceProvider.diceList.length - 1);
-                                  }
-                                : null,
-                            icon: const Icon(Icons.remove),
-                            iconSize: 16,
-                            padding: EdgeInsets.zero,
+                        const Icon(
+                          Icons.casino,
+                          color: Colors.white,
+                          size: 18,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '${_selectedDiceType.label}',
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
                           ),
                         ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            gradient: AppTheme.primaryGradient,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            '${diceProvider.diceCount}',
-                            style: const TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          width: 34,
-                          height: 34,
-                          child: IconButton(
-                            onPressed: diceProvider.diceCount < 20
-                                ? () {
-                                    diceProvider.addDice(_selectedDiceType);
-                                  }
-                                : null,
-                            icon: const Icon(Icons.add),
-                            iconSize: 16,
-                            padding: EdgeInsets.zero,
-                          ),
+                        const SizedBox(width: 4),
+                        const Icon(
+                          Icons.arrow_drop_down,
+                          color: Colors.white,
+                          size: 20,
                         ),
                       ],
                     ),
                   ),
-                ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              // Quantity Control
+              Container(
+                decoration: BoxDecoration(
+                  color: isDark ? AppTheme.cardColor : Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: isDark ? Colors.white10 : Colors.grey.shade300,
+                    width: 1,
+                  ),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 36,
+                      height: 36,
+                      child: IconButton(
+                        onPressed: diceProvider.diceCount > 0
+                            ? () {
+                                diceProvider.removeDice(diceProvider.diceList.length - 1);
+                              }
+                            : null,
+                        icon: const Icon(Icons.remove),
+                        iconSize: 18,
+                        padding: EdgeInsets.zero,
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      child: Text(
+                        '${diceProvider.diceCount}',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? Colors.white : AppTheme.backgroundColor,
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 36,
+                      height: 36,
+                      child: IconButton(
+                        onPressed: diceProvider.diceCount < 20
+                            ? () {
+                                diceProvider.addDice(_selectedDiceType);
+                              }
+                            : null,
+                        icon: const Icon(Icons.add),
+                        iconSize: 18,
+                        padding: EdgeInsets.zero,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          // Action Buttons Row
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () => diceProvider.clearAllDice(),
+                  icon: const Icon(Icons.delete_outline, size: 18),
+                  label: const Text('Clear'),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    side: BorderSide(
+                      color: isDark ? Colors.white24 : Colors.grey.shade300,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                flex: 2,
+                child: ElevatedButton.icon(
+                  onPressed: diceProvider.isRolling ? null : () => diceProvider.rollAllDice(),
+                  icon: const Icon(Icons.casino, size: 18),
+                  label: const Text('Roll All'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.accentColor,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
               ),
             ],
           ),
@@ -250,7 +247,7 @@ class _DiceRollerScreenState extends State<DiceRollerScreen> {
     )
         .animate()
         .fadeIn(duration: 400.ms)
-        .slideY(begin: -0.1, end: 0, duration: 400.ms);
+        .slideY(begin: 0.1, end: 0, duration: 400.ms);
   }
 
   Widget _buildLargeDiceDisplay(
@@ -289,6 +286,34 @@ class _DiceRollerScreenState extends State<DiceRollerScreen> {
           .fadeIn(duration: 400.ms);
     }
 
+    // Dynamic sizing based on dice count
+    final diceCount = diceProvider.diceList.length;
+    final int crossAxisCount;
+    final double childAspectRatio;
+    final double fontSize;
+    
+    if (diceCount == 1) {
+      // Single die: full width, large size
+      crossAxisCount = 1;
+      childAspectRatio = 1.0;
+      fontSize = 120.0;
+    } else if (diceCount <= 4) {
+      // 2-4 dice: 2 columns
+      crossAxisCount = 2;
+      childAspectRatio = 0.95;
+      fontSize = 72.0;
+    } else if (diceCount <= 9) {
+      // 5-9 dice: 3 columns
+      crossAxisCount = 3;
+      childAspectRatio = 0.9;
+      fontSize = 52.0;
+    } else {
+      // 10+ dice: 4 columns
+      crossAxisCount = 4;
+      childAspectRatio = 0.85;
+      fontSize = 40.0;
+    }
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
@@ -296,21 +321,21 @@ class _DiceRollerScreenState extends State<DiceRollerScreen> {
           const SizedBox(height: 16),
           Expanded(
             child: GridView.builder(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 0.95,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: crossAxisCount,
+                childAspectRatio: childAspectRatio,
                 mainAxisSpacing: 16,
                 crossAxisSpacing: 16,
               ),
               itemCount: diceProvider.diceList.length,
               itemBuilder: (context, index) {
                 return _buildLargeDiceCard(
-                    context, diceProvider, index, isDark);
+                    context, diceProvider, index, isDark, fontSize);
               },
             ),
           ),
           const SizedBox(height: 16),
-          if (diceProvider.totalSum > 0)
+          if (diceProvider.totalSum > 0 && diceProvider.diceList.length > 1)
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
@@ -356,8 +381,17 @@ class _DiceRollerScreenState extends State<DiceRollerScreen> {
   }
 
   Widget _buildLargeDiceCard(
-      BuildContext context, DiceProvider diceProvider, int index, bool isDark) {
+      BuildContext context, DiceProvider diceProvider, int index, bool isDark, double fontSize) {
     final dice = diceProvider.diceList[index];
+    final diceCount = diceProvider.diceList.length;
+    
+    // Scale label and helper text based on dice count
+    final double labelFontSize = diceCount == 1 ? 16 : (diceCount <= 4 ? 12 : 10);
+    final double helperFontSize = diceCount == 1 ? 12 : (diceCount <= 4 ? 10 : 8);
+    final double spinnerSize = diceCount == 1 ? 70 : (diceCount <= 4 ? 50 : 35);
+    final double topSpacing = diceCount == 1 ? 16 : (diceCount <= 4 ? 8 : 6);
+    final double bottomSpacing = diceCount == 1 ? 16 : (diceCount <= 4 ? 8 : 6);
+    
     return GestureDetector(
       onTap: diceProvider.isRolling
           ? null
@@ -380,48 +414,61 @@ class _DiceRollerScreenState extends State<DiceRollerScreen> {
         ),
         child: Stack(
           children: [
-            // Main content - centered
-            Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    dice.type.label,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white70,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  if (dice.isRolling)
-                    const SizedBox(
-                      width: 50,
-                      height: 50,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 3,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      ),
-                    )
-                  else
+            // Main content - centered with padding
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
                     Text(
-                      dice.value?.toString() ?? '-',
-                      style: const TextStyle(
-                        fontSize: 72,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                      dice.type.label,
+                      style: TextStyle(
+                        fontSize: labelFontSize,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white70,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  const SizedBox(height: 16),
-                  Text(
-                    dice.isRolling ? 'Rolling...' : 'Tap to roll',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: Colors.white.withOpacity(0.7),
-                      fontWeight: FontWeight.w500,
+                    SizedBox(height: topSpacing),
+                    if (dice.isRolling)
+                      SizedBox(
+                        width: spinnerSize,
+                        height: spinnerSize,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 3,
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      )
+                    else
+                      Flexible(
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            dice.value?.toString() ?? '-',
+                            style: TextStyle(
+                              fontSize: fontSize,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    SizedBox(height: bottomSpacing),
+                    Text(
+                      dice.isRolling ? 'Rolling...' : 'Tap to roll',
+                      style: TextStyle(
+                        fontSize: helperFontSize,
+                        color: Colors.white.withOpacity(0.7),
+                        fontWeight: FontWeight.w500,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
             // Remove button
@@ -462,62 +509,7 @@ class _DiceRollerScreenState extends State<DiceRollerScreen> {
     );
   }
 
-  Widget _buildActionButtonsSection(
-      BuildContext context, DiceProvider diceProvider, bool isDark) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: isDark ? AppTheme.surfaceColor : Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, -5),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: OutlinedButton.icon(
-              onPressed: () => diceProvider.clearAllDice(),
-              icon: const Icon(Icons.delete_outline),
-              label: const Text('Clear'),
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                side: BorderSide(
-                  color: isDark ? Colors.white24 : Colors.grey.shade300,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            flex: 2,
-            child: ElevatedButton.icon(
-              onPressed: diceProvider.isRolling ? null : () => diceProvider.rollAllDice(),
-              icon: const Icon(Icons.casino),
-              label: const Text('Roll All'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.accentColor,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    )
-        .animate()
-        .fadeIn(duration: 400.ms, delay: 300.ms)
-        .slideY(begin: 0.1, end: 0, duration: 400.ms);
-  }
+
 
   void _showDiceSelectionDialog(BuildContext context, bool isDark) {
     showDialog(
