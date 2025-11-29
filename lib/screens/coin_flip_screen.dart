@@ -44,176 +44,70 @@ class CoinFlipScreen extends StatelessWidget {
         child: SafeArea(
           child: Column(
             children: [
-              // Add Coin Section
-              Container(
-                margin: const EdgeInsets.all(16),
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: isDark ? AppTheme.cardColor : AppTheme.lightCard,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 10,
-                      offset: const Offset(0, 5),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Coins',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: isDark ? Colors.white : AppTheme.backgroundColor,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            '${coinProvider.coins.length} coin(s)',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: isDark
-                                  ? Colors.white70
-                                  : AppTheme.backgroundColor.withOpacity(0.6),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        coinProvider.addCoin();
-                      },
-                      icon: const Icon(Icons.add),
-                      label: const Text('Add Coin'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.accentColor,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 12,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              )
-                  .animate()
-                  .fadeIn(duration: 400.ms)
-                  .slideY(begin: -0.1, end: 0, duration: 400.ms),
-
-              // Coins Display
+              // Main Coin Display
               Expanded(
-                child: coinProvider.coins.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.monetization_on_outlined,
-                              size: 80,
-                              color: isDark
-                                  ? Colors.white38
-                                  : AppTheme.backgroundColor.withOpacity(0.3),
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              'Add a coin to get started',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: isDark
-                                    ? Colors.white54
-                                    : AppTheme.backgroundColor.withOpacity(0.6),
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    : ListView(
-                        padding: const EdgeInsets.all(16),
-                        children: [
-                          // Coins Grid
-                          GridView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              crossAxisSpacing: 16,
-                              mainAxisSpacing: 16,
-                              childAspectRatio: 1,
-                            ),
-                            itemCount: coinProvider.coins.length,
-                            itemBuilder: (context, index) {
-                              final coin = coinProvider.coins[index];
-                              return CoinWidget(
-                                coin: coin,
-                                onTap: () {
-                                  coinProvider.flipSingleCoin(index);
-                                },
-                              );
-                            },
-                          ),
-                          const SizedBox(height: 24),
-
-                          // Statistics
-                          if (coinProvider.headsCount > 0 ||
-                              coinProvider.tailsCount > 0)
-                            Container(
-                              padding: const EdgeInsets.all(20),
-                              decoration: BoxDecoration(
-                                color: isDark ? AppTheme.cardColor : AppTheme.lightCard,
-                                borderRadius: BorderRadius.circular(20),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.1),
-                                    blurRadius: 10,
-                                    offset: const Offset(0, 5),
-                                  ),
-                                ],
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                children: [
-                                  _buildStatItem(
-                                    'Heads',
-                                    coinProvider.headsCount,
-                                    Icons.face,
-                                    Colors.amber,
-                                    isDark,
-                                  ),
-                                  Container(
-                                    width: 1,
-                                    height: 40,
-                                    color: isDark
-                                        ? Colors.white24
-                                        : AppTheme.backgroundColor.withOpacity(0.2),
-                                  ),
-                                  _buildStatItem(
-                                    'Tails',
-                                    coinProvider.tailsCount,
-                                    Icons.face_outlined,
-                                    Colors.blue,
-                                    isDark,
-                                  ),
-                                ],
-                              ),
-                            )
-                                .animate()
-                                .scale(duration: 300.ms)
-                                .fadeIn(duration: 300.ms),
-                        ],
-                      ),
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+                    child: CoinWidget(
+                      coin: coinProvider.selectedCoin,
+                      onTap: () {
+                        coinProvider.flipCoin();
+                      },
+                    )
+                        .animate()
+                        .scale(duration: 400.ms, curve: Curves.elasticOut)
+                        .fadeIn(duration: 400.ms),
+                  ),
+                ),
               ),
+
+              // Statistics
+              if (coinProvider.headsCount > 0 || coinProvider.tailsCount > 0)
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: isDark ? AppTheme.cardColor : AppTheme.lightCard,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 10,
+                        offset: const Offset(0, 5),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _buildStatItem(
+                        'Heads',
+                        coinProvider.headsCount,
+                        Icons.face,
+                        Colors.amber,
+                        isDark,
+                      ),
+                      Container(
+                        width: 1,
+                        height: 50,
+                        color: isDark
+                            ? Colors.white24
+                            : AppTheme.backgroundColor.withOpacity(0.2),
+                      ),
+                      _buildStatItem(
+                        'Tails',
+                        coinProvider.tailsCount,
+                        Icons.face_outlined,
+                        Colors.blue,
+                        isDark,
+                      ),
+                    ],
+                  ),
+                )
+                    .animate()
+                    .scale(duration: 300.ms)
+                    .fadeIn(duration: 300.ms),
 
               // Action Buttons
               Container(
@@ -231,63 +125,39 @@ class CoinFlipScreen extends StatelessWidget {
                 child: Row(
                   children: [
                     Expanded(
-                      child: OutlinedButton(
-                        onPressed: coinProvider.coins.isEmpty
-                            ? null
-                            : () {
-                                coinProvider.clearAllCoins();
-                              },
+                      child: OutlinedButton.icon(
+                        onPressed: () {
+                          coinProvider.resetCoin();
+                        },
+                        icon: const Icon(Icons.refresh),
+                        label: const Text('Reset'),
                         style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        child: const Text('Clear All'),
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       flex: 2,
-                      child: ElevatedButton(
-                        onPressed: coinProvider.coins.isEmpty ||
-                                coinProvider.isFlipping
+                      child: ElevatedButton.icon(
+                        onPressed: coinProvider.isFlipping
                             ? null
                             : () {
-                                coinProvider.flipAllCoins();
+                                coinProvider.flipCoin();
                               },
+                        icon: const Icon(Icons.flip),
+                        label: const Text('Flip Coin'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppTheme.accentColor,
                           foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        child: coinProvider.isFlipping
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor:
-                                      AlwaysStoppedAnimation<Color>(Colors.white),
-                                ),
-                              )
-                            : const Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(Icons.flip),
-                                  SizedBox(width: 8),
-                                  Text(
-                                    'Flip All',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
                       ),
                     ),
                   ],
@@ -312,23 +182,25 @@ class CoinFlipScreen extends StatelessWidget {
   ) {
     return Column(
       children: [
-        Icon(icon, color: color, size: 32),
-        const SizedBox(height: 8),
+        Icon(icon, color: color, size: 36),
+        const SizedBox(height: 12),
         Text(
           '$count',
           style: TextStyle(
-            fontSize: 24,
+            fontSize: 28,
             fontWeight: FontWeight.bold,
             color: isDark ? Colors.white : AppTheme.backgroundColor,
           ),
         ),
+        const SizedBox(height: 4),
         Text(
           label,
           style: TextStyle(
-            fontSize: 12,
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
             color: isDark
                 ? Colors.white70
-                : AppTheme.backgroundColor.withOpacity(0.6),
+                : AppTheme.backgroundColor.withOpacity(0.7),
           ),
         ),
       ],

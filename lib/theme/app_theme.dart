@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
   // Premium color palette
@@ -29,14 +28,24 @@ class AppTheme {
         backgroundColor: lightSurface,
         elevation: 0,
         centerTitle: true,
-        titleTextStyle: GoogleFonts.poppins(
+        titleTextStyle: const TextStyle(
           fontSize: 22,
           fontWeight: FontWeight.bold,
           color: backgroundColor,
+          fontFamily: 'Roboto',
         ),
         iconTheme: const IconThemeData(color: backgroundColor),
       ),
-      textTheme: GoogleFonts.poppinsTextTheme(),
+      textTheme: const TextTheme(
+        displayLarge: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+        displayMedium: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+        displaySmall: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        headlineMedium: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        titleLarge: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+        bodyLarge: TextStyle(fontSize: 16),
+        bodyMedium: TextStyle(fontSize: 14),
+        bodySmall: TextStyle(fontSize: 12),
+      ),
       cardTheme: CardThemeData(
         elevation: 4,
         shape: RoundedRectangleBorder(
@@ -61,14 +70,24 @@ class AppTheme {
         backgroundColor: surfaceColor,
         elevation: 0,
         centerTitle: true,
-        titleTextStyle: GoogleFonts.poppins(
+        titleTextStyle: const TextStyle(
           fontSize: 22,
           fontWeight: FontWeight.bold,
           color: Colors.white,
+          fontFamily: 'Roboto',
         ),
         iconTheme: const IconThemeData(color: Colors.white),
       ),
-      textTheme: GoogleFonts.poppinsTextTheme(ThemeData.dark().textTheme),
+      textTheme: TextTheme(
+        displayLarge: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white),
+        displayMedium: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
+        displaySmall: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+        headlineMedium: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+        titleLarge: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white),
+        bodyLarge: const TextStyle(fontSize: 16, color: Colors.white70),
+        bodyMedium: const TextStyle(fontSize: 14, color: Colors.white70),
+        bodySmall: const TextStyle(fontSize: 12, color: Colors.white60),
+      ),
       cardTheme: CardThemeData(
         elevation: 4,
         shape: RoundedRectangleBorder(

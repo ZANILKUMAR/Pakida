@@ -14,7 +14,10 @@ class SpinnerProvider with ChangeNotifier {
     const SpinnerSegment(label: '3', color: Color(0xFFF59E0B)),
     const SpinnerSegment(label: '4', color: Color(0xFF10B981)),
     const SpinnerSegment(label: '5', color: Color(0xFF3B82F6)),
-    const SpinnerSegment(label: '6', color: Color(0xFFA855F7)),
+    const SpinnerSegment(label: '-2', color: Color(0xFFA855F7)),
+    const SpinnerSegment(label: '-3', color: Color(0xFFEF4444)),
+    const SpinnerSegment(label: '-4', color: Color(0xFF14B8A6)),
+    const SpinnerSegment(label: '-5', color: Color(0xFFF97316)),
   ];
 
   late List<SpinnerSegment> _segments;
@@ -56,10 +59,16 @@ class SpinnerProvider with ChangeNotifier {
     _selectedSegment = null;
     notifyListeners();
 
-    await Future.delayed(const Duration(milliseconds: 3200));
+    // Spin for 2.8 seconds
+    await Future.delayed(const Duration(milliseconds: 2800));
 
+    // Select a random segment
+    // The wheel will spin 6 full rotations + random partial rotation
+    // to end with this segment at the pointer
     final random = Random();
-    _selectedSegment = _segments[random.nextInt(_segments.length)];
+    final segmentIndex = random.nextInt(_segments.length);
+    
+    _selectedSegment = _segments[segmentIndex];
     _isSpinning = false;
     notifyListeners();
   }

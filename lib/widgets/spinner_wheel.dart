@@ -1,10 +1,9 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import '../models/spinner_model.dart';
 
-class SpinnerWheel extends StatelessWidget {
+class SpinnerWheel extends StatefulWidget {
   final List<SpinnerSegment> segments;
   final bool isSpinning;
   final SpinnerSegment? selectedSegment;
@@ -17,6 +16,88 @@ class SpinnerWheel extends StatelessWidget {
   });
 
   @override
+  State<SpinnerWheel> createState() => _SpinnerWheelState();
+}
+
+class _SpinnerWheelState extends State<SpinnerWheel> with SingleTickerProviderStateMixin {
+  late AnimationController _spinController;
+  double _currentRotation = 0;
+  double _randomRotationAmount = 0; // Additional random rotation
+
+  @override
+  void initState() {
+    super.initState();
+    _spinController = AnimationController(
+      duration: const Duration(milliseconds: 2800),
+      vsync: this,
+    );
+  }
+
+  @override
+  void didUpdateWidget(SpinnerWheel oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    
+    // When spinning starts
+    if (widget.isSpinning && !oldWidget.isSpinning) {
+      _startSpin();
+    }
+  }
+
+  SpinnerSegment? _getSegmentAtPointer() {
+    if (widget.segments.isEmpty) return null;
+    
+    // Normalize rotation to 0-2π
+    double normalizedRotation = _currentRotation % (2 * pi);
+    if (normalizedRotation < 0) normalizedRotation += 2 * pi;
+    
+    final segmentAngle = (2 * pi) / widget.segments.length;
+    
+    // Pointer is at top (angle 0)
+    // Find which segment center is at top
+    // Segment 0 center is at -π/2 + (segmentAngle/2) initially
+    // After rotation by amount R, segment centers are at: -π/2 + (segmentAngle/2) + R, etc.
+    
+    int segmentIndex = (normalizedRotation / segmentAngle).round() % widget.segments.length;
+    if (segmentIndex < 0) {
+      segmentIndex = widget.segments.length + segmentIndex;
+    }
+    
+    return widget.segments[segmentIndex];
+  }
+
+  void _startSpin() {
+    // Generate random rotation amount (between 0 and full circle)
+    final random = Random();
+    _randomRotationAmount = random.nextDouble() * 2 * pi;
+    
+    _spinController.forward(from: 0.0);
+    
+    // Animate to final rotation
+    _spinController.addListener(() {
+      setState(() {
+        // Spin 6 full rotations during animation + random partial rotation
+        _currentRotation = _spinController.value * 6 * 2 * pi + _randomRotationAmount;
+      });
+    });
+    
+    // After animation completes, get the final segment
+    _spinController.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        final finalSegment = _getSegmentAtPointer();
+        if (finalSegment != null && widget.selectedSegment != finalSegment) {
+          // This will be handled by the provider through the widget update
+        }
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _spinController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return SizedBox(
       width: 280,
@@ -24,78 +105,23 @@ class SpinnerWheel extends StatelessWidget {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          AnimatedRotation(
-            turns: isSpinning ? 6 : 0,
-            duration: Duration(milliseconds: isSpinning ? 2800 : 0),
-            curve: Curves.easeOutCubic,
+          Transform.rotate(
+            angle: _currentRotation,
             child: CustomPaint(
               size: const Size(280, 280),
               painter: _SpinnerWheelPainter(
-                segments: segments,
-                highlight: selectedSegment,
+                segments: widget.segments,
+                highlight: widget.selectedSegment,
               ),
             ),
           ),
           Positioned(
-            top: 8,
-            child: Container(
-              width: 24,
-              height: 24,
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-              ),
-            ),
-          ),
-          Positioned(
-            top: -8,
+            top: 0,
             child: CustomPaint(
               size: const Size(40, 40),
               painter: _PointerPainter(),
             ),
           ),
-          if (selectedSegment != null)
-            Positioned(
-              bottom: 0,
-              child: Column(
-                children: [
-                  Text(
-                    'Result',
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.8),
-                      fontSize: 14,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      color: selectedSegment!.color,
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: selectedSegment!.color.withOpacity(0.5),
-                          blurRadius: 20,
-                        ),
-                      ],
-                    ),
-                    child: Text(
-                      selectedSegment!.label,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              )
-                  .animate()
-                  .scale(duration: 300.ms, curve: Curves.elasticOut)
-                  .fadeIn(duration: 300.ms),
-            ),
         ],
       ),
     );
@@ -113,34 +139,56 @@ class _SpinnerWheelPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Paint paint = Paint()
+    final fillPaint = Paint()
       ..style = PaintingStyle.fill
-      ..strokeWidth = 2;
+      ..strokeWidth = 0;
+
+    final borderPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2
+      ..color = Colors.white.withOpacity(0.4);
 
     final double radius = size.width / 2;
     final Offset center = Offset(radius, radius);
     final double sweepAngle = (2 * pi) / segments.length;
+    final double startAngle = -pi / 2 - sweepAngle / 2; // Center first segment at top
 
     for (int i = 0; i < segments.length; i++) {
       final segment = segments[i];
-      paint.color = segment == highlight
+      fillPaint.color = segment == highlight
           ? segment.color.withOpacity(0.95)
           : segment.color.withOpacity(0.85);
       final Path path = Path()
         ..moveTo(center.dx, center.dy)
         ..arcTo(
           Rect.fromCircle(center: center, radius: radius),
-          -pi / 2 + sweepAngle * i,
+          startAngle + sweepAngle * i,
           sweepAngle,
           false,
         )
         ..close();
 
-      canvas.drawPath(path, paint);
+      // Draw filled segment
+      canvas.drawPath(path, fillPaint);
+      
+      // Draw border only if not highlighted and not adjacent to highlighted
+      if (segment != highlight) {
+        bool isAdjacentToHighlight = false;
+        if (highlight != null) {
+          final highlightIndex = segments.indexWhere((s) => s == highlight);
+          final currentIndex = i;
+          final prevIndex = (currentIndex - 1 + segments.length) % segments.length;
+          final nextIndex = (currentIndex + 1) % segments.length;
+          isAdjacentToHighlight = (prevIndex == highlightIndex || nextIndex == highlightIndex);
+        }
+        if (!isAdjacentToHighlight) {
+          canvas.drawPath(path, borderPaint);
+        }
+      }
 
       // draw text
       final double textAngle =
-          -pi / 2 + sweepAngle * i + sweepAngle / 2;
+          startAngle + sweepAngle * i + sweepAngle / 2;
       final TextPainter textPainter = TextPainter(
         text: TextSpan(
           text: segment.label,
