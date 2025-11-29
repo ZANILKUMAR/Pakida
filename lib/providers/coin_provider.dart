@@ -30,10 +30,10 @@ class CoinProvider with ChangeNotifier {
 
   void resetCoin() {
     _selectedCoin = _selectedCoin.copyWith(
-      result: null,
       flipCount: 0,
       headsCount: 0,
       tailsCount: 0,
+      clearResult: true,
     );
     notifyListeners();
   }
@@ -44,8 +44,8 @@ class CoinProvider with ChangeNotifier {
     _isFlipping = true;
     _selectedCoin = _selectedCoin.copyWith(
       isFlipping: true,
-      result: null,
       flipCount: _selectedCoin.flipCount + 1,
+      clearResult: true,
     );
     notifyListeners();
 

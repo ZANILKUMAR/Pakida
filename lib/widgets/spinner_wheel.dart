@@ -189,17 +189,40 @@ class _SpinnerWheelPainter extends CustomPainter {
       // draw text
       final double textAngle =
           startAngle + sweepAngle * i + sweepAngle / 2;
+      
+      // Adjust font size based on text length and number of segments
+      double fontSize = 14;
+      String displayText = segment.label;
+      
+      // Calculate available segment width
+      final double segmentArcLength = radius * sweepAngle * 0.7; // 70% of arc
+      
+      if (segment.label.length > 8) {
+        fontSize = 10;
+      } else if (segment.label.length > 5) {
+        fontSize = 12;
+      }
+      
+      // Further reduce if many segments
+      if (segments.length > 10) {
+        fontSize = fontSize * 0.85;
+      } else if (segments.length > 8) {
+        fontSize = fontSize * 0.9;
+      }
+      
       final TextPainter textPainter = TextPainter(
         text: TextSpan(
-          text: segment.label,
-          style: const TextStyle(
+          text: displayText,
+          style: TextStyle(
             color: Colors.white,
-            fontSize: 14,
+            fontSize: fontSize,
             fontWeight: FontWeight.bold,
           ),
         ),
         textDirection: TextDirection.ltr,
-      )..layout();
+        maxLines: 1,
+        ellipsis: '...',
+      )..layout(maxWidth: segmentArcLength);
 
       final double textRadius = radius * 0.65;
       final Offset textOffset = Offset(
@@ -225,17 +248,37 @@ class _PointerPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final Path path = Path()
-      ..moveTo(size.width / 2, 0)
-      ..lineTo(size.width, size.height)
-      ..lineTo(0, size.height)
+      ..moveTo(size.width / 2, size.height)
+      ..lineTo(size.width, 0)
+      ..lineTo(0, 0)
       ..close();
 
+    // Draw border/outline
+    final Paint borderPaint = Paint()
+      ..color = const Color(0xFF1F2937) // Dark border
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3;
+
+    // Draw fill with gradient effect
     final Paint paint = Paint()
-      ..color = Colors.white
+      ..shader = const LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          Color(0xFFFBBF24), // Yellow
+          Color(0xFFF59E0B), // Orange
+        ],
+      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height))
       ..style = PaintingStyle.fill;
 
-    canvas.drawShadow(path, Colors.black.withOpacity(0.4), 4, true);
+    // Draw shadow
+    canvas.drawShadow(path, Colors.black.withOpacity(0.5), 6, true);
+    
+    // Draw fill
     canvas.drawPath(path, paint);
+    
+    // Draw border on top
+    canvas.drawPath(path, borderPaint);
   }
 
   @override

@@ -16,6 +16,16 @@ class _DiceRollerScreenState extends State<DiceRollerScreen> {
   DiceType _selectedDiceType = DiceType.d6;
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Initialize selected dice type from existing dice
+    final diceProvider = Provider.of<DiceProvider>(context, listen: false);
+    if (diceProvider.diceList.isNotEmpty) {
+      _selectedDiceType = diceProvider.diceList.first.type;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -209,7 +219,12 @@ class _DiceRollerScreenState extends State<DiceRollerScreen> {
             children: [
               Expanded(
                 child: OutlinedButton.icon(
-                  onPressed: () => diceProvider.clearAllDice(),
+                  onPressed: () {
+                    diceProvider.clearAllDice();
+                    setState(() {
+                      _selectedDiceType = DiceType.d6;
+                    });
+                  },
                   icon: const Icon(Icons.delete_outline, size: 18),
                   label: const Text('Clear'),
                   style: OutlinedButton.styleFrom(
@@ -395,7 +410,7 @@ class _DiceRollerScreenState extends State<DiceRollerScreen> {
     return GestureDetector(
       onTap: diceProvider.isRolling
           ? null
-          : () => diceProvider.rollSingleDice(index),
+          : () => diceProvider.rollAllDice(),
       child: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -476,7 +491,17 @@ class _DiceRollerScreenState extends State<DiceRollerScreen> {
               top: 8,
               right: 8,
               child: GestureDetector(
-                onTap: () => diceProvider.removeDice(index),
+                onTap: () {
+                  diceProvider.removeDice(index);
+                  // Update selected dice type to match remaining dice or default to D6
+                  setState(() {
+                    if (diceProvider.diceList.isNotEmpty) {
+                      _selectedDiceType = diceProvider.diceList.first.type;
+                    } else {
+                      _selectedDiceType = DiceType.d6;
+                    }
+                  });
+                },
                 child: Container(
                   decoration: BoxDecoration(
                     color: Colors.red.shade600,
@@ -545,8 +570,13 @@ class _DiceRollerScreenState extends State<DiceRollerScreen> {
                   final isSelected = _selectedDiceType == diceType;
                   return GestureDetector(
                     onTap: () {
+                      final diceProvider = Provider.of<DiceProvider>(context, listen: false);
                       setState(() {
                         _selectedDiceType = diceType;
+                        // Update all existing dice to the new type
+                        for (int i = 0; i < diceProvider.diceCount; i++) {
+                          diceProvider.setDiceType(i, diceType);
+                        }
                       });
                       Navigator.pop(context);
                     },

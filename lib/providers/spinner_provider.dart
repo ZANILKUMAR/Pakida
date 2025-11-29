@@ -68,6 +68,13 @@ class SpinnerProvider with ChangeNotifier {
     }
   }
 
+  void updateSegment(int index, SpinnerSegment segment) {
+    if (index >= 0 && index < _segments.length) {
+      _segments[index] = segment;
+      notifyListeners();
+    }
+  }
+
   Future<void> _playSound(String soundFile) async {
     if (!_settingsProvider.soundEnabled) return;
     try {

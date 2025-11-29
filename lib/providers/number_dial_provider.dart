@@ -31,7 +31,7 @@ class NumberDialProvider with ChangeNotifier {
     _numberDial = _numberDial.copyWith(
       min: min,
       max: max,
-      currentValue: (min + max) ~/ 2,
+      currentValue: 0,
     );
     notifyListeners();
   }

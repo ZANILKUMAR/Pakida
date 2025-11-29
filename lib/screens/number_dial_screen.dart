@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../providers/number_dial_provider.dart';
@@ -105,6 +106,10 @@ class _NumberDialScreenState extends State<NumberDialScreen>
                           child: TextField(
                             controller: _minController,
                             keyboardType: TextInputType.number,
+                            maxLength: 9,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.allow(RegExp(r'^-?[0-9]*')),
+                            ],
                             decoration: InputDecoration(
                               labelText: 'Minimum',
                               border: OutlineInputBorder(
@@ -114,13 +119,46 @@ class _NumberDialScreenState extends State<NumberDialScreen>
                               fillColor: isDark
                                   ? AppTheme.surfaceColor
                                   : Colors.white,
+                              counterText: '',
                             ),
                             onChanged: (value) {
+                              if (value.isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: const Text('Minimum value cannot be blank'),
+                                    backgroundColor: Colors.red.shade600,
+                                    duration: const Duration(milliseconds: 1500),
+                                    behavior: SnackBarBehavior.floating,
+                                  ),
+                                );
+                                return;
+                              }
                               final min = int.tryParse(value);
                               final max = int.tryParse(_maxController.text);
-                              if (min != null && max != null && min < max) {
-                                numberDialProvider.setRange(min, max);
+                              if (min == null) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: const Text('Please enter a valid number'),
+                                    backgroundColor: Colors.red.shade600,
+                                    duration: const Duration(milliseconds: 1500),
+                                    behavior: SnackBarBehavior.floating,
+                                  ),
+                                );
+                                return;
                               }
+                              if (max == null) return;
+                              if (min >= max) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: const Text('Minimum must be less than maximum'),
+                                    backgroundColor: Colors.red.shade600,
+                                    duration: const Duration(milliseconds: 1500),
+                                    behavior: SnackBarBehavior.floating,
+                                  ),
+                                );
+                                return;
+                              }
+                              numberDialProvider.setRange(min, max);
                             },
                           ),
                         ),
@@ -129,6 +167,10 @@ class _NumberDialScreenState extends State<NumberDialScreen>
                           child: TextField(
                             controller: _maxController,
                             keyboardType: TextInputType.number,
+                            maxLength: 9,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.allow(RegExp(r'^-?[0-9]*')),
+                            ],
                             decoration: InputDecoration(
                               labelText: 'Maximum',
                               border: OutlineInputBorder(
@@ -138,13 +180,46 @@ class _NumberDialScreenState extends State<NumberDialScreen>
                               fillColor: isDark
                                   ? AppTheme.surfaceColor
                                   : Colors.white,
+                              counterText: '',
                             ),
                             onChanged: (value) {
+                              if (value.isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: const Text('Maximum value cannot be blank'),
+                                    backgroundColor: Colors.red.shade600,
+                                    duration: const Duration(milliseconds: 1500),
+                                    behavior: SnackBarBehavior.floating,
+                                  ),
+                                );
+                                return;
+                              }
                               final min = int.tryParse(_minController.text);
                               final max = int.tryParse(value);
-                              if (min != null && max != null && min < max) {
-                                numberDialProvider.setRange(min, max);
+                              if (max == null) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: const Text('Please enter a valid number'),
+                                    backgroundColor: Colors.red.shade600,
+                                    duration: const Duration(milliseconds: 1500),
+                                    behavior: SnackBarBehavior.floating,
+                                  ),
+                                );
+                                return;
                               }
+                              if (min == null) return;
+                              if (max <= min) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: const Text('Maximum must be greater than minimum'),
+                                    backgroundColor: Colors.red.shade600,
+                                    duration: const Duration(milliseconds: 1500),
+                                    behavior: SnackBarBehavior.floating,
+                                  ),
+                                );
+                                return;
+                              }
+                              numberDialProvider.setRange(min, max);
                             },
                           ),
                         ),
@@ -293,6 +368,45 @@ class _NumberDialScreenState extends State<NumberDialScreen>
                     onPressed: numberDialProvider.isSpinning
                         ? null
                         : () {
+                            final min = int.tryParse(_minController.text);
+                            final max = int.tryParse(_maxController.text);
+                            
+                            if (_minController.text.isEmpty || _maxController.text.isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: const Text('Please enter both minimum and maximum values'),
+                                  backgroundColor: Colors.red.shade600,
+                                  duration: const Duration(seconds: 2),
+                                  behavior: SnackBarBehavior.floating,
+                                ),
+                              );
+                              return;
+                            }
+                            
+                            if (min == null || max == null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: const Text('Please enter valid numbers'),
+                                  backgroundColor: Colors.red.shade600,
+                                  duration: const Duration(seconds: 2),
+                                  behavior: SnackBarBehavior.floating,
+                                ),
+                              );
+                              return;
+                            }
+                            
+                            if (min >= max) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: const Text('Maximum must be greater than minimum'),
+                                  backgroundColor: Colors.red.shade600,
+                                  duration: const Duration(seconds: 2),
+                                  behavior: SnackBarBehavior.floating,
+                                ),
+                              );
+                              return;
+                            }
+                            
                             numberDialProvider.spin();
                           },
                     style: ElevatedButton.styleFrom(

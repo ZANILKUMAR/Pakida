@@ -29,73 +29,83 @@ class HomeScreen extends StatelessWidget {
         );
       },
       child: Container(
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: isDark ? AppTheme.cardColor : Colors.white,
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.1),
-              blurRadius: 20,
-              offset: const Offset(0, 8),
+              blurRadius: 15,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        child: Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
                 gradient: gradient,
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
                     color: gradient.colors.first.withOpacity(0.4),
-                    blurRadius: 16,
-                    spreadRadius: 2,
+                    blurRadius: 12,
+                    spreadRadius: 1,
                   ),
                 ],
               ),
               child: Icon(
                 icon,
-                size: 36,
+                size: 32,
                 color: Colors.white,
               ),
             ),
-            const SizedBox(height: 16),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: isDark ? Colors.white : AppTheme.backgroundColor,
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? Colors.white : AppTheme.backgroundColor,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    description,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: isDark
+                          ? Colors.white60
+                          : AppTheme.backgroundColor.withOpacity(0.6),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ),
-              textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 6),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: Text(
-                description,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: isDark
-                      ? Colors.white60
-                      : AppTheme.backgroundColor.withOpacity(0.6),
-                ),
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
+            Icon(
+              Icons.arrow_forward_ios,
+              size: 16,
+              color: isDark
+                  ? Colors.white38
+                  : AppTheme.backgroundColor.withOpacity(0.3),
             ),
           ],
         ),
       )
           .animate()
           .fadeIn(duration: 400.ms, delay: Duration(milliseconds: delay))
-          .scale(
-            begin: const Offset(0.8, 0.8),
-            end: const Offset(1, 1),
+          .slideX(
+            begin: -0.2,
+            end: 0,
             duration: 400.ms,
             delay: Duration(milliseconds: delay),
             curve: Curves.easeOutBack,
@@ -204,65 +214,72 @@ class HomeScreen extends StatelessWidget {
                   .fadeIn(duration: 400.ms)
                   .slideX(begin: -0.2, end: 0, duration: 400.ms),
 
-              // Tools Grid - 2x2 Layout
+              // Tools Grid - 4x1 Layout for mobile (single column view)
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                  child: GridView.count(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
-                    childAspectRatio: 0.95,
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                  child: Column(
                     children: [
-                      _buildGridToolCard(
-                        context,
-                        title: 'Dice Roller',
-                        description: 'Roll multiple dice',
-                        icon: Icons.casino_outlined,
-                        gradient: AppTheme.primaryGradient,
-                        screen: const DiceRollerScreen(),
-                        delay: 100,
-                      ),
-                      _buildGridToolCard(
-                        context,
-                        title: 'Coin Flip',
-                        description: 'Heads or tails',
-                        icon: Icons.monetization_on_outlined,
-                        gradient: AppTheme.accentGradient,
-                        screen: const CoinFlipScreen(),
-                        delay: 200,
-                      ),
-                      _buildGridToolCard(
-                        context,
-                        title: 'Random Number',
-                        description: 'Generate random',
-                        icon: Icons.dialpad_outlined,
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            const Color(0xFF10B981),
-                            const Color(0xFF059669),
-                          ],
+                      Expanded(
+                        child: _buildGridToolCard(
+                          context,
+                          title: 'Dice Roller',
+                          description: 'Roll multiple dice',
+                          icon: Icons.casino_outlined,
+                          gradient: AppTheme.primaryGradient,
+                          screen: const DiceRollerScreen(),
+                          delay: 100,
                         ),
-                        screen: const NumberDialScreen(),
-                        delay: 300,
                       ),
-                      _buildGridToolCard(
-                        context,
-                        title: 'Spinner Wheel',
-                        description: 'Quick random picks',
-                        icon: Icons.refresh_outlined,
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            const Color(0xFFFB7185),
-                            const Color(0xFFF59E0B),
-                          ],
+                      const SizedBox(height: 12),
+                      Expanded(
+                        child: _buildGridToolCard(
+                          context,
+                          title: 'Coin Flip',
+                          description: 'Heads or tails',
+                          icon: Icons.monetization_on_outlined,
+                          gradient: AppTheme.accentGradient,
+                          screen: const CoinFlipScreen(),
+                          delay: 200,
                         ),
-                        screen: SpinnerWheelScreen(),
-                        delay: 400,
+                      ),
+                      const SizedBox(height: 12),
+                      Expanded(
+                        child: _buildGridToolCard(
+                          context,
+                          title: 'Random Number',
+                          description: 'Generate random',
+                          icon: Icons.dialpad_outlined,
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              const Color(0xFF10B981),
+                              const Color(0xFF059669),
+                            ],
+                          ),
+                          screen: const NumberDialScreen(),
+                          delay: 300,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Expanded(
+                        child: _buildGridToolCard(
+                          context,
+                          title: 'Spinner Wheel',
+                          description: 'Quick random picks',
+                          icon: Icons.album_outlined,
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              const Color(0xFFFB7185),
+                              const Color(0xFFF59E0B),
+                            ],
+                          ),
+                          screen: SpinnerWheelScreen(),
+                          delay: 400,
+                        ),
                       ),
                     ],
                   ),
