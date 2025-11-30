@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../providers/number_dial_provider.dart';
@@ -35,6 +36,50 @@ class _NumberDialScreenState extends State<NumberDialScreen>
     super.dispose();
   }
 
+  bool _validateAndSpin(BuildContext context, NumberDialProvider provider) {
+    final min = int.tryParse(_minController.text);
+    final max = int.tryParse(_maxController.text);
+    
+    if (_minController.text.isEmpty || _maxController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Please enter both minimum and maximum values'),
+          backgroundColor: Colors.red.shade600,
+          duration: const Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return false;
+    }
+    
+    if (min == null || max == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Please enter valid numbers'),
+          backgroundColor: Colors.red.shade600,
+          duration: const Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return false;
+    }
+    
+    if (min >= max) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Maximum must be greater than minimum'),
+          backgroundColor: Colors.red.shade600,
+          duration: const Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return false;
+    }
+    
+    provider.spin();
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     final numberDialProvider = Provider.of<NumberDialProvider>(context);
@@ -43,7 +88,7 @@ class _NumberDialScreenState extends State<NumberDialScreen>
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Number Dial'),
+        title: const Text('Random Number'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
@@ -105,6 +150,10 @@ class _NumberDialScreenState extends State<NumberDialScreen>
                           child: TextField(
                             controller: _minController,
                             keyboardType: TextInputType.number,
+                            maxLength: 9,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.allow(RegExp(r'^-?[0-9]*')),
+                            ],
                             decoration: InputDecoration(
                               labelText: 'Minimum',
                               border: OutlineInputBorder(
@@ -114,7 +163,47 @@ class _NumberDialScreenState extends State<NumberDialScreen>
                               fillColor: isDark
                                   ? AppTheme.surfaceColor
                                   : Colors.white,
+                              counterText: '',
                             ),
+                            onChanged: (value) {
+                              if (value.isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: const Text('Minimum value cannot be blank'),
+                                    backgroundColor: Colors.red.shade600,
+                                    duration: const Duration(milliseconds: 1500),
+                                    behavior: SnackBarBehavior.floating,
+                                  ),
+                                );
+                                return;
+                              }
+                              final min = int.tryParse(value);
+                              final max = int.tryParse(_maxController.text);
+                              if (min == null) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: const Text('Please enter a valid number'),
+                                    backgroundColor: Colors.red.shade600,
+                                    duration: const Duration(milliseconds: 1500),
+                                    behavior: SnackBarBehavior.floating,
+                                  ),
+                                );
+                                return;
+                              }
+                              if (max == null) return;
+                              if (min >= max) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: const Text('Minimum must be less than maximum'),
+                                    backgroundColor: Colors.red.shade600,
+                                    duration: const Duration(milliseconds: 1500),
+                                    behavior: SnackBarBehavior.floating,
+                                  ),
+                                );
+                                return;
+                              }
+                              numberDialProvider.setRange(min, max);
+                            },
                           ),
                         ),
                         const SizedBox(width: 16),
@@ -122,6 +211,10 @@ class _NumberDialScreenState extends State<NumberDialScreen>
                           child: TextField(
                             controller: _maxController,
                             keyboardType: TextInputType.number,
+                            maxLength: 9,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.allow(RegExp(r'^-?[0-9]*')),
+                            ],
                             decoration: InputDecoration(
                               labelText: 'Maximum',
                               border: OutlineInputBorder(
@@ -131,33 +224,48 @@ class _NumberDialScreenState extends State<NumberDialScreen>
                               fillColor: isDark
                                   ? AppTheme.surfaceColor
                                   : Colors.white,
+                              counterText: '',
                             ),
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        ElevatedButton(
-                          onPressed: () {
-                            final min = int.tryParse(_minController.text);
-                            final max = int.tryParse(_maxController.text);
-                            if (min != null && max != null && min < max) {
+                            onChanged: (value) {
+                              if (value.isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: const Text('Maximum value cannot be blank'),
+                                    backgroundColor: Colors.red.shade600,
+                                    duration: const Duration(milliseconds: 1500),
+                                    behavior: SnackBarBehavior.floating,
+                                  ),
+                                );
+                                return;
+                              }
+                              final min = int.tryParse(_minController.text);
+                              final max = int.tryParse(value);
+                              if (max == null) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: const Text('Please enter a valid number'),
+                                    backgroundColor: Colors.red.shade600,
+                                    duration: const Duration(milliseconds: 1500),
+                                    behavior: SnackBarBehavior.floating,
+                                  ),
+                                );
+                                return;
+                              }
+                              if (min == null) return;
+                              if (max <= min) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: const Text('Maximum must be greater than minimum'),
+                                    backgroundColor: Colors.red.shade600,
+                                    duration: const Duration(milliseconds: 1500),
+                                    behavior: SnackBarBehavior.floating,
+                                  ),
+                                );
+                                return;
+                              }
                               numberDialProvider.setRange(min, max);
-                            } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Invalid range. Min must be less than max.'),
-                                ),
-                              );
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF10B981),
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.all(16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
+                            },
                           ),
-                          child: const Icon(Icons.check),
                         ),
                       ],
                     ),
@@ -175,27 +283,31 @@ class _NumberDialScreenState extends State<NumberDialScreen>
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       // Circular Dial
-                      Container(
-                        width: 280,
-                        height: 280,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              const Color(0xFF10B981),
-                              const Color(0xFF059669),
+                      GestureDetector(
+                        onTap: numberDialProvider.isSpinning
+                            ? null
+                            : () => _validateAndSpin(context, numberDialProvider),
+                        child: Container(
+                          width: 280,
+                          height: 280,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                const Color(0xFF10B981),
+                                const Color(0xFF059669),
+                              ],
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFF10B981).withOpacity(0.4),
+                                blurRadius: 30,
+                                offset: const Offset(0, 15),
+                              ),
                             ],
                           ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(0xFF10B981).withOpacity(0.4),
-                              blurRadius: 30,
-                              offset: const Offset(0, 15),
-                            ),
-                          ],
-                        ),
                         child: Stack(
                           alignment: Alignment.center,
                           children: [
@@ -272,21 +384,9 @@ class _NumberDialScreenState extends State<NumberDialScreen>
                                 ),
                           ],
                         ),
-                      )
-                          .animate(target: numberDialProvider.isSpinning ? 1 : 0)
-                          .shake(duration: 300.ms, hz: 4, curve: Curves.easeInOut),
-
-                      const SizedBox(height: 32),
-
-                      // Range display
-                      Text(
-                        'Range: ${numberDial.min} - ${numberDial.max}',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: isDark
-                              ? Colors.white70
-                              : AppTheme.backgroundColor.withOpacity(0.6),
-                        ),
+                        )
+                            .animate(target: numberDialProvider.isSpinning ? 1 : 0)
+                            .shake(duration: 300.ms, hz: 4, curve: Curves.easeInOut),
                       ),
                     ],
                   ),
@@ -311,9 +411,7 @@ class _NumberDialScreenState extends State<NumberDialScreen>
                   child: ElevatedButton(
                     onPressed: numberDialProvider.isSpinning
                         ? null
-                        : () {
-                            numberDialProvider.spin();
-                          },
+                        : () => _validateAndSpin(context, numberDialProvider),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF10B981),
                       foregroundColor: Colors.white,

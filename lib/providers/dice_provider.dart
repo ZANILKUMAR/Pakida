@@ -2,15 +2,18 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:vibration/vibration.dart';
 import '../models/dice_model.dart';
+import 'settings_provider.dart';
 
 class DiceProvider with ChangeNotifier {
   late final List<Dice> _diceList;
   bool _isRolling = false;
   final Random _random = Random();
   late AudioPlayer _audioPlayer;
+  final SettingsProvider _settingsProvider;
 
-  DiceProvider() {
+  DiceProvider(this._settingsProvider) {
     _diceList = [];
     _initAudio();
     _ensureDefaultDice();
@@ -29,18 +32,38 @@ class DiceProvider with ChangeNotifier {
   }
 
   Future<void> _playDiceSound() async {
+    if (!_settingsProvider.soundEnabled) return;
     try {
-      await _audioPlayer.play(AssetSource('sounds/dice_roll.mp3'));
+      await _audioPlayer.stop();
+      await _audioPlayer.play(AssetSource('sounds/dice_roll.wav'));
     } catch (e) {
       debugPrint('Error playing sound: $e');
     }
   }
 
+  @override
+  void dispose() {
+    _audioPlayer.dispose();
+    super.dispose();
+  }
+
   Future<void> _triggerVibration() async {
+    if (!_settingsProvider.vibrationEnabled) return;
     try {
-      await HapticFeedback.mediumImpact();
+      if (defaultTargetPlatform == TargetPlatform.android || 
+          defaultTargetPlatform == TargetPlatform.iOS) {
+        final hasVibrator = await Vibration.hasVibrator();
+        if (hasVibrator == true) {
+          await Vibration.vibrate(duration: 50);
+        } else {
+          await HapticFeedback.mediumImpact();
+        }
+      }
     } catch (e) {
       debugPrint('Error triggering vibration: $e');
+      try {
+        await HapticFeedback.mediumImpact();
+      } catch (_) {}
     }
   }
 
@@ -113,9 +136,8 @@ class DiceProvider with ChangeNotifier {
       );
     }
 
-    // Trigger final vibration and sound
+    // Trigger final vibration only
     await _triggerVibration();
-    await _playDiceSound();
 
     _isRolling = false;
     notifyListeners();

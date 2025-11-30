@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import '../widgets/tool_card.dart';
 import '../theme/app_theme.dart';
 import 'dice_roller_screen.dart';
 import 'coin_flip_screen.dart';
@@ -11,6 +9,109 @@ import 'settings_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
+
+  Widget _buildGridToolCard(
+    BuildContext context, {
+    required String title,
+    required String description,
+    required IconData icon,
+    required Gradient gradient,
+    required Widget screen,
+    required int delay,
+  }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => screen),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isDark ? AppTheme.cardColor : Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 15,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                gradient: gradient,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: gradient.colors.first.withOpacity(0.4),
+                    blurRadius: 12,
+                    spreadRadius: 1,
+                  ),
+                ],
+              ),
+              child: Icon(
+                icon,
+                size: 32,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? Colors.white : AppTheme.backgroundColor,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    description,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: isDark
+                          ? Colors.white60
+                          : AppTheme.backgroundColor.withOpacity(0.6),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.arrow_forward_ios,
+              size: 16,
+              color: isDark
+                  ? Colors.white38
+                  : AppTheme.backgroundColor.withOpacity(0.3),
+            ),
+          ],
+        ),
+      )
+          .animate()
+          .fadeIn(duration: 400.ms, delay: Duration(milliseconds: delay))
+          .slideX(
+            begin: -0.2,
+            end: 0,
+            duration: 400.ms,
+            delay: Duration(milliseconds: delay),
+            curve: Curves.easeOutBack,
+          ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,35 +147,25 @@ class HomeScreen extends StatelessWidget {
                 child: Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(8),
+                      width: 64,
+                      height: 64,
                       decoration: BoxDecoration(
-                        gradient: AppTheme.primaryGradient,
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
-                            color: AppTheme.primaryColor.withOpacity(0.4),
-                            blurRadius: 12,
-                            spreadRadius: 2,
+                            color: Colors.black.withOpacity(0.15),
+                            blurRadius: 16,
+                            offset: const Offset(0, 6),
                           ),
                         ],
                       ),
                       child: ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: SvgPicture.asset(
-                          'assets/images/pakida_logo.svg',
-                          width: 48,
-                          height: 48,
-                          colorFilter: const ColorFilter.mode(
-                            Colors.white,
-                            BlendMode.srcIn,
-                          ),
-                          placeholderBuilder: (context) {
-                            return const Icon(
-                              Icons.casino,
-                              color: Colors.white,
-                              size: 32,
-                            );
-                          },
+                        borderRadius: BorderRadius.circular(20),
+                        child: Image.asset(
+                          'assets/images/pakida_logo.png',
+                          width: 64,
+                          height: 64,
+                          fit: BoxFit.cover,
                         ),
                       ),
                     ),
@@ -123,86 +214,75 @@ class HomeScreen extends StatelessWidget {
                   .fadeIn(duration: 400.ms)
                   .slideX(begin: -0.2, end: 0, duration: 400.ms),
 
-              // Tools Grid
+              // Tools Grid - 4x1 Layout for mobile (single column view)
               Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  children: [
-                    ToolCard(
-                      title: 'Dice Roller',
-                      description: 'Roll multiple dice with different shapes',
-                      icon: Icons.casino_outlined,
-                      gradient: AppTheme.primaryGradient,
-                      onTap: () {
-                        Navigator.push(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: _buildGridToolCard(
                           context,
-                          MaterialPageRoute(
-                            builder: (context) => const DiceRollerScreen(),
-                          ),
-                        );
-                      },
-                      delay: 100,
-                    ),
-                    ToolCard(
-                      title: 'Coin Flip',
-                      description: 'Flip coins and get heads or tails',
-                      icon: Icons.monetization_on_outlined,
-                      gradient: AppTheme.accentGradient,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const CoinFlipScreen(),
-                          ),
-                        );
-                      },
-                      delay: 200,
-                    ),
-                    ToolCard(
-                      title: 'Number Dial',
-                      description: 'Spin to get a random number',
-                      icon: Icons.dialpad_outlined,
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          const Color(0xFF10B981),
-                          const Color(0xFF059669),
-                        ],
+                          title: 'Dice Roller',
+                          description: 'Roll multiple dice',
+                          icon: Icons.casino_outlined,
+                          gradient: AppTheme.primaryGradient,
+                          screen: const DiceRollerScreen(),
+                          delay: 100,
+                        ),
                       ),
-                      onTap: () {
-                        Navigator.push(
+                      const SizedBox(height: 12),
+                      Expanded(
+                        child: _buildGridToolCard(
                           context,
-                          MaterialPageRoute(
-                            builder: (context) => const NumberDialScreen(),
-                          ),
-                        );
-                      },
-                      delay: 300,
-                    ),
-                    ToolCard(
-                      title: 'Spinner Wheel',
-                      description: 'Colorful wheel for quick random picks',
-                      icon: Icons.refresh_outlined,
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          const Color(0xFFFB7185),
-                          const Color(0xFFF59E0B),
-                        ],
+                          title: 'Coin Flip',
+                          description: 'Heads or tails',
+                          icon: Icons.monetization_on_outlined,
+                          gradient: AppTheme.accentGradient,
+                          screen: const CoinFlipScreen(),
+                          delay: 200,
+                        ),
                       ),
-                      onTap: () {
-                        Navigator.push(
+                      const SizedBox(height: 12),
+                      Expanded(
+                        child: _buildGridToolCard(
                           context,
-                          MaterialPageRoute(
-                            builder: (context) => SpinnerWheelScreen(),
+                          title: 'Random Number',
+                          description: 'Generate random',
+                          icon: Icons.dialpad_outlined,
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              const Color(0xFF10B981),
+                              const Color(0xFF059669),
+                            ],
                           ),
-                        );
-                      },
-                      delay: 400,
-                    ),
-                  ],
+                          screen: const NumberDialScreen(),
+                          delay: 300,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Expanded(
+                        child: _buildGridToolCard(
+                          context,
+                          title: 'Spinner Wheel',
+                          description: 'Quick random picks',
+                          icon: Icons.album_outlined,
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              const Color(0xFFFB7185),
+                              const Color(0xFFF59E0B),
+                            ],
+                          ),
+                          screen: SpinnerWheelScreen(),
+                          delay: 400,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],

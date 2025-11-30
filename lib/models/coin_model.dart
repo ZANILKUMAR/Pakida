@@ -24,9 +24,10 @@ class Coin {
     int? flipCount,
     int? headsCount,
     int? tailsCount,
+    bool clearResult = false,
   }) {
     return Coin(
-      result: result ?? this.result,
+      result: clearResult ? null : (result ?? this.result),
       isFlipping: isFlipping ?? this.isFlipping,
       flipCount: flipCount ?? this.flipCount,
       headsCount: headsCount ?? this.headsCount,

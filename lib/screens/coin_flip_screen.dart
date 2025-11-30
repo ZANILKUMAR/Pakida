@@ -2,11 +2,35 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../providers/coin_provider.dart';
+import '../providers/settings_provider.dart';
 import '../theme/app_theme.dart';
 import '../widgets/coin_widget.dart';
 
-class CoinFlipScreen extends StatelessWidget {
+class CoinFlipScreen extends StatefulWidget {
   const CoinFlipScreen({super.key});
+
+  @override
+  State<CoinFlipScreen> createState() => _CoinFlipScreenState();
+}
+
+class _CoinFlipScreenState extends State<CoinFlipScreen> {
+  @override
+  void initState() {
+    super.initState();
+    final coinProvider = Provider.of<CoinProvider>(context, listen: false);
+    final settingsProvider = Provider.of<SettingsProvider>(context, listen: false);
+
+    coinProvider.setFlipCallbacks(
+      () {
+        settingsProvider.playSound('coin_flip.wav');
+        settingsProvider.playVibration();
+      },
+      (result) {
+        settingsProvider.playSound('coin_land.wav');
+        settingsProvider.playVibration();
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -207,4 +231,3 @@ class CoinFlipScreen extends StatelessWidget {
     );
   }
 }
-
