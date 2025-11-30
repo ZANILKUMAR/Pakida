@@ -1,4 +1,4 @@
-package com.example.pakida
+package com.pakida.app
 
 import io.flutter.embedding.android.FlutterActivity
 

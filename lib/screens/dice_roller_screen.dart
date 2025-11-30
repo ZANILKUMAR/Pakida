@@ -244,7 +244,7 @@ class _DiceRollerScreenState extends State<DiceRollerScreen> {
                 child: ElevatedButton.icon(
                   onPressed: diceProvider.isRolling ? null : () => diceProvider.rollAllDice(),
                   icon: const Icon(Icons.casino, size: 18),
-                  label: const Text('Roll All'),
+                  label: const Text('Roll'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.accentColor,
                     foregroundColor: Colors.white,
