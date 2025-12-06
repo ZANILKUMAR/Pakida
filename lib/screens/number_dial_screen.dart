@@ -37,9 +37,12 @@ class _NumberDialScreenState extends State<NumberDialScreen>
   }
 
   bool _validateAndSpin(BuildContext context, NumberDialProvider provider) {
+    // Dismiss keyboard first
+    FocusScope.of(context).unfocus();
+
     final min = int.tryParse(_minController.text);
     final max = int.tryParse(_maxController.text);
-    
+
     if (_minController.text.isEmpty || _maxController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -51,7 +54,7 @@ class _NumberDialScreenState extends State<NumberDialScreen>
       );
       return false;
     }
-    
+
     if (min == null || max == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -63,7 +66,7 @@ class _NumberDialScreenState extends State<NumberDialScreen>
       );
       return false;
     }
-    
+
     if (min >= max) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -75,7 +78,7 @@ class _NumberDialScreenState extends State<NumberDialScreen>
       );
       return false;
     }
-    
+
     provider.spin();
     return true;
   }
@@ -152,7 +155,8 @@ class _NumberDialScreenState extends State<NumberDialScreen>
                             keyboardType: TextInputType.number,
                             maxLength: 9,
                             inputFormatters: [
-                              FilteringTextInputFormatter.allow(RegExp(r'^-?[0-9]*')),
+                              FilteringTextInputFormatter.allow(
+                                  RegExp(r'^-?[0-9]*')),
                             ],
                             decoration: InputDecoration(
                               labelText: 'Minimum',
@@ -160,18 +164,19 @@ class _NumberDialScreenState extends State<NumberDialScreen>
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               filled: true,
-                              fillColor: isDark
-                                  ? AppTheme.surfaceColor
-                                  : Colors.white,
+                              fillColor:
+                                  isDark ? AppTheme.surfaceColor : Colors.white,
                               counterText: '',
                             ),
                             onChanged: (value) {
                               if (value.isEmpty) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                    content: const Text('Minimum value cannot be blank'),
+                                    content: const Text(
+                                        'Minimum value cannot be blank'),
                                     backgroundColor: Colors.red.shade600,
-                                    duration: const Duration(milliseconds: 1500),
+                                    duration:
+                                        const Duration(milliseconds: 1500),
                                     behavior: SnackBarBehavior.floating,
                                   ),
                                 );
@@ -182,9 +187,11 @@ class _NumberDialScreenState extends State<NumberDialScreen>
                               if (min == null) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                    content: const Text('Please enter a valid number'),
+                                    content: const Text(
+                                        'Please enter a valid number'),
                                     backgroundColor: Colors.red.shade600,
-                                    duration: const Duration(milliseconds: 1500),
+                                    duration:
+                                        const Duration(milliseconds: 1500),
                                     behavior: SnackBarBehavior.floating,
                                   ),
                                 );
@@ -194,9 +201,11 @@ class _NumberDialScreenState extends State<NumberDialScreen>
                               if (min >= max) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                    content: const Text('Minimum must be less than maximum'),
+                                    content: const Text(
+                                        'Minimum must be less than maximum'),
                                     backgroundColor: Colors.red.shade600,
-                                    duration: const Duration(milliseconds: 1500),
+                                    duration:
+                                        const Duration(milliseconds: 1500),
                                     behavior: SnackBarBehavior.floating,
                                   ),
                                 );
@@ -213,7 +222,8 @@ class _NumberDialScreenState extends State<NumberDialScreen>
                             keyboardType: TextInputType.number,
                             maxLength: 9,
                             inputFormatters: [
-                              FilteringTextInputFormatter.allow(RegExp(r'^-?[0-9]*')),
+                              FilteringTextInputFormatter.allow(
+                                  RegExp(r'^-?[0-9]*')),
                             ],
                             decoration: InputDecoration(
                               labelText: 'Maximum',
@@ -221,18 +231,19 @@ class _NumberDialScreenState extends State<NumberDialScreen>
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               filled: true,
-                              fillColor: isDark
-                                  ? AppTheme.surfaceColor
-                                  : Colors.white,
+                              fillColor:
+                                  isDark ? AppTheme.surfaceColor : Colors.white,
                               counterText: '',
                             ),
                             onChanged: (value) {
                               if (value.isEmpty) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                    content: const Text('Maximum value cannot be blank'),
+                                    content: const Text(
+                                        'Maximum value cannot be blank'),
                                     backgroundColor: Colors.red.shade600,
-                                    duration: const Duration(milliseconds: 1500),
+                                    duration:
+                                        const Duration(milliseconds: 1500),
                                     behavior: SnackBarBehavior.floating,
                                   ),
                                 );
@@ -243,9 +254,11 @@ class _NumberDialScreenState extends State<NumberDialScreen>
                               if (max == null) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                    content: const Text('Please enter a valid number'),
+                                    content: const Text(
+                                        'Please enter a valid number'),
                                     backgroundColor: Colors.red.shade600,
-                                    duration: const Duration(milliseconds: 1500),
+                                    duration:
+                                        const Duration(milliseconds: 1500),
                                     behavior: SnackBarBehavior.floating,
                                   ),
                                 );
@@ -255,9 +268,11 @@ class _NumberDialScreenState extends State<NumberDialScreen>
                               if (max <= min) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                    content: const Text('Maximum must be greater than minimum'),
+                                    content: const Text(
+                                        'Maximum must be greater than minimum'),
                                     backgroundColor: Colors.red.shade600,
-                                    duration: const Duration(milliseconds: 1500),
+                                    duration:
+                                        const Duration(milliseconds: 1500),
                                     behavior: SnackBarBehavior.floating,
                                   ),
                                 );
@@ -286,7 +301,8 @@ class _NumberDialScreenState extends State<NumberDialScreen>
                       GestureDetector(
                         onTap: numberDialProvider.isSpinning
                             ? null
-                            : () => _validateAndSpin(context, numberDialProvider),
+                            : () =>
+                                _validateAndSpin(context, numberDialProvider),
                         child: Container(
                           width: 280,
                           height: 280,
@@ -308,85 +324,99 @@ class _NumberDialScreenState extends State<NumberDialScreen>
                               ),
                             ],
                           ),
-                        child: Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            // Outer ring
-                            Container(
-                              width: 260,
-                              height: 260,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.white.withOpacity(0.1),
-                                border: Border.all(
-                                  color: Colors.white.withOpacity(0.3),
-                                  width: 3,
-                                ),
-                              ),
-                            ),
-                            // Inner circle with number
-                            Container(
-                              width: 200,
-                              height: 200,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.white,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.2),
-                                    blurRadius: 20,
-                                    offset: const Offset(0, 10),
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              // Outer ring
+                              Container(
+                                width: 260,
+                                height: 260,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.white.withOpacity(0.1),
+                                  border: Border.all(
+                                    color: Colors.white.withOpacity(0.3),
+                                    width: 3,
                                   ),
-                                ],
-                              ),
-                              child: Center(
-                                child: numberDialProvider.isSpinning
-                                    ? const SizedBox(
-                                        width: 40,
-                                        height: 40,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 3,
-                                          valueColor: AlwaysStoppedAnimation<Color>(
-                                            Color(0xFF10B981),
-                                          ),
-                                        ),
-                                      )
-                                    : Text(
-                                        '${numberDial.currentValue}',
-                                        style: const TextStyle(
-                                          fontSize: 64,
-                                          fontWeight: FontWeight.bold,
-                                          color: Color(0xFF10B981),
-                                        ),
-                                      )
-                                        .animate()
-                                        .scale(
-                                          duration: 400.ms,
-                                          begin: const Offset(0.5, 0.5),
-                                          end: const Offset(1, 1),
-                                          curve: Curves.elasticOut,
-                                        )
-                                        .fadeIn(duration: 400.ms),
-                              ),
-                            )
-                                .animate(target: numberDialProvider.isSpinning ? 1 : 0)
-                                .rotate(
-                                  duration: 2000.ms,
-                                  begin: 0,
-                                  end: 2,
-                                  curve: Curves.easeInOut,
-                                )
-                                .scale(
-                                  duration: 2000.ms,
-                                  begin: const Offset(1, 1),
-                                  end: const Offset(1.1, 1.1),
-                                  curve: Curves.easeInOut,
                                 ),
-                          ],
-                        ),
+                              ),
+                              // Inner circle with number
+                              Container(
+                                width: 200,
+                                height: 200,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.white,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.2),
+                                      blurRadius: 20,
+                                      offset: const Offset(0, 10),
+                                    ),
+                                  ],
+                                ),
+                                child: Center(
+                                  child: numberDialProvider.isSpinning
+                                      ? const SizedBox(
+                                          width: 40,
+                                          height: 40,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 3,
+                                            valueColor:
+                                                AlwaysStoppedAnimation<Color>(
+                                              Color(0xFF10B981),
+                                            ),
+                                          ),
+                                        )
+                                      : Padding(
+                                          padding: const EdgeInsets.all(16.0),
+                                          child: FittedBox(
+                                            fit: BoxFit.scaleDown,
+                                            child: Text(
+                                              '${numberDial.currentValue}',
+                                              style: const TextStyle(
+                                                fontSize: 64,
+                                                fontWeight: FontWeight.bold,
+                                                color: Color(0xFF10B981),
+                                              ),
+                                              maxLines: 1,
+                                            ),
+                                          ),
+                                        )
+                                          .animate()
+                                          .scale(
+                                            duration: 400.ms,
+                                            begin: const Offset(0.5, 0.5),
+                                            end: const Offset(1, 1),
+                                            curve: Curves.elasticOut,
+                                          )
+                                          .fadeIn(duration: 400.ms),
+                                ),
+                              )
+                                  .animate(
+                                      target:
+                                          numberDialProvider.isSpinning ? 1 : 0)
+                                  .rotate(
+                                    duration: 2000.ms,
+                                    begin: 0,
+                                    end: 2,
+                                    curve: Curves.easeInOut,
+                                  )
+                                  .scale(
+                                    duration: 2000.ms,
+                                    begin: const Offset(1, 1),
+                                    end: const Offset(1.1, 1.1),
+                                    curve: Curves.easeInOut,
+                                  ),
+                            ],
+                          ),
                         )
-                            .animate(target: numberDialProvider.isSpinning ? 1 : 0)
-                            .shake(duration: 300.ms, hz: 4, curve: Curves.easeInOut),
+                            .animate(
+                                target: numberDialProvider.isSpinning ? 1 : 0)
+                            .shake(
+                                duration: 300.ms,
+                                hz: 4,
+                                curve: Curves.easeInOut),
                       ),
                     ],
                   ),
@@ -457,5 +487,3 @@ class _NumberDialScreenState extends State<NumberDialScreen>
     );
   }
 }
-
-

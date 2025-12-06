@@ -22,7 +22,7 @@ class DiceProvider with ChangeNotifier {
   List<Dice> get diceList => List.unmodifiable(_diceList);
   bool get isRolling => _isRolling;
   int get diceCount => _diceList.length;
-  
+
   int get totalSum => _diceList
       .where((dice) => dice.value != null)
       .fold(0, (sum, dice) => sum + (dice.value ?? 0));
@@ -50,7 +50,7 @@ class DiceProvider with ChangeNotifier {
   Future<void> _triggerVibration() async {
     if (!_settingsProvider.vibrationEnabled) return;
     try {
-      if (defaultTargetPlatform == TargetPlatform.android || 
+      if (defaultTargetPlatform == TargetPlatform.android ||
           defaultTargetPlatform == TargetPlatform.iOS) {
         final hasVibrator = await Vibration.hasVibrator();
         if (hasVibrator == true) {
@@ -69,13 +69,14 @@ class DiceProvider with ChangeNotifier {
 
   void _ensureDefaultDice() {
     if (_diceList.isEmpty) {
-      _diceList.add(Dice(type: DiceType.d6, value: null, isRolling: false));
+      _diceList.add(
+          Dice(type: DiceType.d6, value: DiceType.d6.sides, isRolling: false));
       notifyListeners();
     }
   }
 
   void addDice(DiceType type) {
-    _diceList.add(Dice(type: type, value: null, isRolling: false));
+    _diceList.add(Dice(type: type, value: type.sides, isRolling: false));
     notifyListeners();
   }
 
@@ -89,7 +90,7 @@ class DiceProvider with ChangeNotifier {
 
   void setDiceType(int index, DiceType type) {
     if (index >= 0 && index < _diceList.length) {
-      _diceList[index] = Dice(type: type, value: null, isRolling: false);
+      _diceList[index] = Dice(type: type, value: type.sides, isRolling: false);
       notifyListeners();
     }
   }
@@ -105,10 +106,10 @@ class DiceProvider with ChangeNotifier {
 
     _isRolling = true;
     notifyListeners();
-    
+
     // Trigger initial vibration
     await _triggerVibration();
-    
+
     // Set all dice to rolling state
     for (int i = 0; i < _diceList.length; i++) {
       _diceList[i] = Dice(
@@ -176,5 +177,3 @@ class DiceProvider with ChangeNotifier {
     notifyListeners();
   }
 }
-
-
