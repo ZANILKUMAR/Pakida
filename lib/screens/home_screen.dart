@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../theme/app_theme.dart';
@@ -5,6 +6,7 @@ import 'dice_roller_screen.dart';
 import 'coin_flip_screen.dart';
 import 'number_dial_screen.dart';
 import 'spinner_wheel_screen.dart';
+import 'chess_timer_screen.dart';
 import 'settings_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -14,13 +16,14 @@ class HomeScreen extends StatelessWidget {
     BuildContext context, {
     required String title,
     required String description,
-    required IconData icon,
+    IconData? icon,
+    Widget? customIcon,
     required Gradient gradient,
     required Widget screen,
     required int delay,
   }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -56,11 +59,12 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ],
               ),
-              child: Icon(
-                icon,
-                size: 32,
-                color: Colors.white,
-              ),
+              child: customIcon ??
+                  Icon(
+                    icon ?? Icons.error,
+                    size: 32,
+                    color: Colors.white,
+                  ),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -110,6 +114,57 @@ class HomeScreen extends StatelessWidget {
             delay: Duration(milliseconds: delay),
             curve: Curves.easeOutBack,
           ),
+    );
+  }
+
+  Widget _buildChessPieceIcon() {
+    return SizedBox(
+      width: 32,
+      height: 32,
+      child: Stack(
+        children: [
+          // King piece (white)
+          Positioned(
+            left: 0,
+            top: 0,
+            child: CustomPaint(
+              size: const Size(18, 32),
+              painter: ChessKingPainter(Colors.white),
+            ),
+          ),
+          // Pawn piece (white with slight transparency)
+          Positioned(
+            right: 0,
+            bottom: 0,
+            child: CustomPaint(
+              size: const Size(16, 28),
+              painter: ChessPawnPainter(Colors.white.withOpacity(0.85)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRandomNumberIcon() {
+    return SizedBox(
+      width: 32,
+      height: 32,
+      child: CustomPaint(
+        size: const Size(32, 32),
+        painter: RandomNumberIconPainter(Colors.white),
+      ),
+    );
+  }
+
+  Widget _buildSpinnerWheelIcon() {
+    return SizedBox(
+      width: 32,
+      height: 32,
+      child: CustomPaint(
+        size: const Size(32, 32),
+        painter: SpinnerWheelIconPainter(Colors.white),
+      ),
     );
   }
 
@@ -179,7 +234,9 @@ class HomeScreen extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 28,
                               fontWeight: FontWeight.bold,
-                              color: isDark ? Colors.white : AppTheme.backgroundColor,
+                              color: isDark
+                                  ? Colors.white
+                                  : AppTheme.backgroundColor,
                             ),
                           ),
                           Text(
@@ -217,7 +274,8 @@ class HomeScreen extends StatelessWidget {
               // Tools Grid - 4x1 Layout for mobile (single column view)
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
                   child: Column(
                     children: [
                       Expanded(
@@ -235,11 +293,18 @@ class HomeScreen extends StatelessWidget {
                       Expanded(
                         child: _buildGridToolCard(
                           context,
-                          title: 'Coin Flip',
-                          description: 'Heads or tails',
-                          icon: Icons.monetization_on_outlined,
-                          gradient: AppTheme.accentGradient,
-                          screen: const CoinFlipScreen(),
+                          title: 'Chess Timer',
+                          description: 'Two-player timer',
+                          customIcon: _buildChessPieceIcon(),
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              const Color(0xFF8B5CF6),
+                              const Color(0xFF7C3AED),
+                            ],
+                          ),
+                          screen: const ChessTimerScreen(),
                           delay: 200,
                         ),
                       ),
@@ -247,18 +312,11 @@ class HomeScreen extends StatelessWidget {
                       Expanded(
                         child: _buildGridToolCard(
                           context,
-                          title: 'Random Number',
-                          description: 'Generate random',
-                          icon: Icons.dialpad_outlined,
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              const Color(0xFF10B981),
-                              const Color(0xFF059669),
-                            ],
-                          ),
-                          screen: const NumberDialScreen(),
+                          title: 'Coin Flip',
+                          description: 'Heads or tails',
+                          icon: Icons.monetization_on_outlined,
+                          gradient: AppTheme.accentGradient,
+                          screen: const CoinFlipScreen(),
                           delay: 300,
                         ),
                       ),
@@ -268,7 +326,7 @@ class HomeScreen extends StatelessWidget {
                           context,
                           title: 'Spinner Wheel',
                           description: 'Quick random picks',
-                          icon: Icons.album_outlined,
+                          customIcon: _buildSpinnerWheelIcon(),
                           gradient: LinearGradient(
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
@@ -279,6 +337,25 @@ class HomeScreen extends StatelessWidget {
                           ),
                           screen: SpinnerWheelScreen(),
                           delay: 400,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Expanded(
+                        child: _buildGridToolCard(
+                          context,
+                          title: 'Random Number',
+                          description: 'Generate random',
+                          customIcon: _buildRandomNumberIcon(),
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              const Color(0xFF10B981),
+                              const Color(0xFF059669),
+                            ],
+                          ),
+                          screen: const NumberDialScreen(),
+                          delay: 500,
                         ),
                       ),
                     ],
@@ -293,4 +370,270 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
+// Custom painter for chess king piece
+class ChessKingPainter extends CustomPainter {
+  final Color color;
 
+  ChessKingPainter(this.color);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+
+    // Base
+    canvas.drawRect(
+      Rect.fromLTWH(size.width * 0.1, size.height * 0.85, size.width * 0.8,
+          size.height * 0.12),
+      paint,
+    );
+
+    // Stem
+    canvas.drawRect(
+      Rect.fromLTWH(size.width * 0.35, size.height * 0.55, size.width * 0.3,
+          size.height * 0.35),
+      paint,
+    );
+
+    // Body (circle)
+    canvas.drawCircle(
+      Offset(size.width * 0.5, size.height * 0.45),
+      size.width * 0.25,
+      paint,
+    );
+
+    // Cross on top
+    // Vertical line
+    canvas.drawRect(
+      Rect.fromLTWH(size.width * 0.43, size.height * 0.05, size.width * 0.14,
+          size.height * 0.25),
+      paint,
+    );
+    // Horizontal line
+    canvas.drawRect(
+      Rect.fromLTWH(size.width * 0.25, size.height * 0.13, size.width * 0.5,
+          size.height * 0.1),
+      paint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
+}
+
+// Custom painter for chess pawn piece
+class ChessPawnPainter extends CustomPainter {
+  final Color color;
+
+  ChessPawnPainter(this.color);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+
+    // Base
+    canvas.drawRect(
+      Rect.fromLTWH(size.width * 0.1, size.height * 0.85, size.width * 0.8,
+          size.height * 0.12),
+      paint,
+    );
+
+    // Stem
+    final stemPath = Path();
+    stemPath.moveTo(size.width * 0.4, size.height * 0.5);
+    stemPath.lineTo(size.width * 0.35, size.height * 0.85);
+    stemPath.lineTo(size.width * 0.65, size.height * 0.85);
+    stemPath.lineTo(size.width * 0.6, size.height * 0.5);
+    stemPath.close();
+    canvas.drawPath(stemPath, paint);
+
+    // Head (circle)
+    canvas.drawCircle(
+      Offset(size.width * 0.5, size.height * 0.35),
+      size.width * 0.22,
+      paint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
+}
+
+// Custom painter for random number icon (digital display style)
+class RandomNumberIconPainter extends CustomPainter {
+  final Color color;
+
+  RandomNumberIconPainter(this.color);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+
+    final strokePaint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0;
+
+    // Draw digital display frame
+    final framePath = Path()
+      ..addRRect(RRect.fromRectAndRadius(
+        Rect.fromLTWH(0, size.height * 0.15, size.width, size.height * 0.7),
+        const Radius.circular(4),
+      ));
+    canvas.drawPath(framePath, strokePaint);
+
+    // Draw stylized numbers "123" in digital/segmented style
+    // Number "1"
+    _drawDigitalOne(canvas, size.width * 0.15, size.height * 0.35,
+        size.width * 0.15, size.height * 0.35, paint);
+
+    // Number "2"
+    _drawDigitalTwo(canvas, size.width * 0.42, size.height * 0.35,
+        size.width * 0.15, size.height * 0.35, paint);
+
+    // Number "3"
+    _drawDigitalThree(canvas, size.width * 0.69, size.height * 0.35,
+        size.width * 0.15, size.height * 0.35, paint);
+
+    // Add random/shuffle arrows at corners
+    final arrowPaint = Paint()
+      ..color = color.withOpacity(0.6)
+      ..style = PaintingStyle.fill;
+
+    // Top right arrow
+    final arrow1 = Path()
+      ..moveTo(size.width * 0.85, size.height * 0.05)
+      ..lineTo(size.width * 0.95, size.height * 0.1)
+      ..lineTo(size.width * 0.85, size.height * 0.15)
+      ..close();
+    canvas.drawPath(arrow1, arrowPaint);
+
+    // Bottom left arrow
+    final arrow2 = Path()
+      ..moveTo(size.width * 0.15, size.height * 0.85)
+      ..lineTo(size.width * 0.05, size.height * 0.9)
+      ..lineTo(size.width * 0.15, size.height * 0.95)
+      ..close();
+    canvas.drawPath(arrow2, arrowPaint);
+  }
+
+  void _drawDigitalOne(
+      Canvas canvas, double x, double y, double w, double h, Paint paint) {
+    // Vertical right segment
+    canvas.drawRect(Rect.fromLTWH(x + w * 0.6, y, w * 0.25, h), paint);
+  }
+
+  void _drawDigitalTwo(
+      Canvas canvas, double x, double y, double w, double h, Paint paint) {
+    final segmentHeight = h * 0.15;
+    // Top horizontal
+    canvas.drawRect(Rect.fromLTWH(x, y, w, segmentHeight), paint);
+    // Right top vertical
+    canvas.drawRect(
+        Rect.fromLTWH(x + w - w * 0.25, y, w * 0.25, h * 0.42), paint);
+    // Middle horizontal
+    canvas.drawRect(Rect.fromLTWH(x, y + h * 0.42, w, segmentHeight), paint);
+    // Left bottom vertical
+    canvas.drawRect(Rect.fromLTWH(x, y + h * 0.42, w * 0.25, h * 0.58), paint);
+    // Bottom horizontal
+    canvas.drawRect(
+        Rect.fromLTWH(x, y + h - segmentHeight, w, segmentHeight), paint);
+  }
+
+  void _drawDigitalThree(
+      Canvas canvas, double x, double y, double w, double h, Paint paint) {
+    final segmentHeight = h * 0.15;
+    // Top horizontal
+    canvas.drawRect(Rect.fromLTWH(x, y, w, segmentHeight), paint);
+    // Right top vertical
+    canvas.drawRect(
+        Rect.fromLTWH(x + w - w * 0.25, y, w * 0.25, h * 0.42), paint);
+    // Middle horizontal
+    canvas.drawRect(Rect.fromLTWH(x, y + h * 0.42, w, segmentHeight), paint);
+    // Right bottom vertical
+    canvas.drawRect(
+        Rect.fromLTWH(x + w - w * 0.25, y + h * 0.42, w * 0.25, h * 0.58),
+        paint);
+    // Bottom horizontal
+    canvas.drawRect(
+        Rect.fromLTWH(x, y + h - segmentHeight, w, segmentHeight), paint);
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
+}
+
+// Custom painter for spinner wheel icon
+class SpinnerWheelIconPainter extends CustomPainter {
+  final Color color;
+
+  SpinnerWheelIconPainter(this.color);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+
+    final strokePaint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0;
+
+    final center = Offset(size.width * 0.5, size.height * 0.5);
+    final radius = size.width * 0.42;
+
+    // Draw outer circle
+    canvas.drawCircle(center, radius, strokePaint);
+
+    // Draw wheel segments (8 segments)
+    for (int i = 0; i < 8; i++) {
+      final angle = (i * 45) * math.pi / 180;
+      final endX = center.dx + radius * 0.9 * math.cos(angle);
+      final endY = center.dy + radius * 0.9 * math.sin(angle);
+
+      canvas.drawLine(
+        center,
+        Offset(endX, endY),
+        strokePaint..strokeWidth = 1.5,
+      );
+    }
+
+    // Draw alternating filled segments for visual interest
+    for (int i = 0; i < 8; i += 2) {
+      final startAngle = (i * 45 - 90) * math.pi / 180;
+      final sweepAngle = 45 * math.pi / 180;
+
+      final path = Path()
+        ..moveTo(center.dx, center.dy)
+        ..arcTo(
+          Rect.fromCircle(center: center, radius: radius),
+          startAngle,
+          sweepAngle,
+          false,
+        )
+        ..close();
+
+      canvas.drawPath(path, paint..color = color.withOpacity(0.3));
+    }
+
+    // Draw center hub
+    canvas.drawCircle(center, size.width * 0.12, paint..color = color);
+
+    // Draw pointer/arrow at top
+    final arrowPath = Path()
+      ..moveTo(size.width * 0.5, size.height * 0.02)
+      ..lineTo(size.width * 0.42, size.height * 0.12)
+      ..lineTo(size.width * 0.58, size.height * 0.12)
+      ..close();
+    canvas.drawPath(arrowPath, paint..color = color);
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
+}

@@ -1,32 +1,38 @@
 import 'dart:math';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:vibration/vibration.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/spinner_model.dart';
 import 'settings_provider.dart';
 
 class SpinnerProvider with ChangeNotifier {
   late AudioPlayer _audioPlayer;
   final SettingsProvider _settingsProvider;
+  static const String _segmentsKey = 'spinner_segments';
 
   SpinnerProvider(this._settingsProvider) {
     _segments = List.from(_defaultSegments);
     _audioPlayer = AudioPlayer();
+    _loadSegments();
   }
 
   static final List<SpinnerSegment> _defaultSegments = [
-    const SpinnerSegment(label: '1', color: Color(0xFF6366F1)),
+    const SpinnerSegment(label: '1', color: Color(0xFF6366F1)),    
+     const SpinnerSegment(label: '-3', color: Color(0xFFEF4444)),
     const SpinnerSegment(label: '2', color: Color(0xFFEC4899)),
     const SpinnerSegment(label: '3', color: Color(0xFFF59E0B)),
-    const SpinnerSegment(label: '4', color: Color(0xFF10B981)),
-    const SpinnerSegment(label: '5', color: Color(0xFF3B82F6)),
-    const SpinnerSegment(label: '-2', color: Color(0xFFA855F7)),
-    const SpinnerSegment(label: '-3', color: Color(0xFFEF4444)),
-    const SpinnerSegment(label: '-4', color: Color(0xFF14B8A6)),
     const SpinnerSegment(label: '-5', color: Color(0xFFF97316)),
+    const SpinnerSegment(label: '4', color: Color(0xFF10B981)),
+     const SpinnerSegment(label: '-2', color: Color(0xFFA855F7)),
+    const SpinnerSegment(label: '5', color: Color(0xFF3B82F6)),
+   
+    
+    
   ];
 
   late List<SpinnerSegment> _segments;
@@ -44,14 +50,52 @@ class SpinnerProvider with ChangeNotifier {
     _onSpinEnd = onSpinEnd;
   }
 
+  Future<void> _loadSegments() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final segmentsJson = prefs.getString(_segmentsKey);
+      if (segmentsJson != null) {
+        final List<dynamic> decoded = json.decode(segmentsJson);
+        _segments = decoded
+            .map((item) => SpinnerSegment(
+                  label: item['label'] as String,
+                  color: Color(item['color'] as int),
+                ))
+            .toList();
+        notifyListeners();
+      }
+    } catch (e) {
+      debugPrint('Error loading spinner segments: $e');
+    }
+  }
+
+  Future<void> _saveSegments() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final segmentsJson = json.encode(
+        _segments
+            .map((segment) => {
+                  'label': segment.label,
+                  'color': segment.color.value,
+                })
+            .toList(),
+      );
+      await prefs.setString(_segmentsKey, segmentsJson);
+    } catch (e) {
+      debugPrint('Error saving spinner segments: $e');
+    }
+  }
+
   void resetToDefault() {
     _segments = List.from(_defaultSegments);
     _selectedSegment = null;
+    _saveSegments();
     notifyListeners();
   }
 
   void addSegment(SpinnerSegment segment) {
     _segments.add(segment);
+    _saveSegments();
     notifyListeners();
   }
 
@@ -64,6 +108,7 @@ class SpinnerProvider with ChangeNotifier {
           _segments[index] == _selectedSegment) {
         _selectedSegment = null;
       }
+      _saveSegments();
       notifyListeners();
     }
   }
@@ -71,6 +116,7 @@ class SpinnerProvider with ChangeNotifier {
   void updateSegment(int index, SpinnerSegment segment) {
     if (index >= 0 && index < _segments.length) {
       _segments[index] = segment;
+      _saveSegments();
       notifyListeners();
     }
   }
@@ -94,7 +140,7 @@ class SpinnerProvider with ChangeNotifier {
   Future<void> _playVibration() async {
     if (!_settingsProvider.vibrationEnabled) return;
     try {
-      if (defaultTargetPlatform == TargetPlatform.android || 
+      if (defaultTargetPlatform == TargetPlatform.android ||
           defaultTargetPlatform == TargetPlatform.iOS) {
         final hasVibrator = await Vibration.hasVibrator();
         if (hasVibrator == true) {
@@ -130,16 +176,12 @@ class SpinnerProvider with ChangeNotifier {
     // to end with this segment at the pointer
     final random = Random();
     final segmentIndex = random.nextInt(_segments.length);
-    
+
     _selectedSegment = _segments[segmentIndex];
     _isSpinning = false;
     notifyListeners();
 
-    await _playSound('spin_end.wav');
     await _playVibration();
     _onSpinEnd?.call(_selectedSegment);
   }
 }
-
-
-

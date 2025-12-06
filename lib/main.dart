@@ -4,6 +4,7 @@ import 'providers/dice_provider.dart';
 import 'providers/coin_provider.dart';
 import 'providers/number_dial_provider.dart';
 import 'providers/spinner_provider.dart';
+import 'providers/chess_timer_provider.dart';
 import 'providers/settings_provider.dart';
 import 'screens/home_screen.dart';
 import 'theme/app_theme.dart';
@@ -24,24 +25,25 @@ class MyApp extends StatelessWidget {
           create: (context) => DiceProvider(
             Provider.of<SettingsProvider>(context, listen: false),
           ),
-          update: (context, settings, previous) => 
-            previous ?? DiceProvider(settings),
+          update: (context, settings, previous) =>
+              previous ?? DiceProvider(settings),
         ),
         ChangeNotifierProvider(create: (_) => CoinProvider()),
         ChangeNotifierProxyProvider<SettingsProvider, NumberDialProvider>(
           create: (context) => NumberDialProvider(
             Provider.of<SettingsProvider>(context, listen: false),
           ),
-          update: (context, settings, previous) => 
-            previous ?? NumberDialProvider(settings),
+          update: (context, settings, previous) =>
+              previous ?? NumberDialProvider(settings),
         ),
         ChangeNotifierProxyProvider<SettingsProvider, SpinnerProvider>(
           create: (context) => SpinnerProvider(
             Provider.of<SettingsProvider>(context, listen: false),
           ),
-          update: (context, settings, previous) => 
-            previous ?? SpinnerProvider(settings),
+          update: (context, settings, previous) =>
+              previous ?? SpinnerProvider(settings),
         ),
+        ChangeNotifierProvider(create: (_) => ChessTimerProvider()),
       ],
       child: Consumer<SettingsProvider>(
         builder: (context, settings, _) {
@@ -58,4 +60,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
