@@ -335,13 +335,48 @@ class _DiceRollerScreenState extends State<DiceRollerScreen> {
       );
     }
 
+    // Special handling for two dice - split screen half and half
+    if (diceCount == 2) {
+      return Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16),
+        child: Column(
+          children: [
+            const SizedBox(height: 16),
+            Expanded(
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: 8.0),
+                      child: _buildLargeDiceCard(
+                          context, diceProvider, 0, isDark, 120.0,
+                          isHalfScreen: true),
+                    ),
+                  ),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 8.0),
+                      child: _buildLargeDiceCard(
+                          context, diceProvider, 1, isDark, 120.0,
+                          isHalfScreen: true),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
+      );
+    }
+
     // Multiple dice - use grid layout
     final int crossAxisCount;
     final double childAspectRatio;
     final double fontSize;
 
     if (diceCount <= 4) {
-      // 2-4 dice: 2 columns
+      // 3-4 dice: 2 columns
       crossAxisCount = 2;
       childAspectRatio = 0.95;
       fontSize = 72.0;
@@ -426,21 +461,36 @@ class _DiceRollerScreenState extends State<DiceRollerScreen> {
 
   Widget _buildLargeDiceCard(BuildContext context, DiceProvider diceProvider,
       int index, bool isDark, double fontSize,
-      {bool isFullScreen = false}) {
+      {bool isFullScreen = false, bool isHalfScreen = false}) {
     final dice = diceProvider.diceList[index];
     final diceCount = diceProvider.diceList.length;
 
-    // Scale label and helper text based on dice count and full screen mode
-    final double labelFontSize =
-        isFullScreen ? 20 : (diceCount == 1 ? 16 : (diceCount <= 4 ? 12 : 10));
-    final double helperFontSize =
-        isFullScreen ? 14 : (diceCount == 1 ? 12 : (diceCount <= 4 ? 10 : 8));
-    final double spinnerSize =
-        isFullScreen ? 90 : (diceCount == 1 ? 70 : (diceCount <= 4 ? 50 : 35));
-    final double topSpacing =
-        isFullScreen ? 24 : (diceCount == 1 ? 16 : (diceCount <= 4 ? 8 : 6));
-    final double bottomSpacing =
-        isFullScreen ? 24 : (diceCount == 1 ? 16 : (diceCount <= 4 ? 8 : 6));
+    // Scale label and helper text based on dice count and screen mode
+    final double labelFontSize = isFullScreen
+        ? 20
+        : isHalfScreen
+            ? 16
+            : (diceCount == 1 ? 16 : (diceCount <= 4 ? 12 : 10));
+    final double helperFontSize = isFullScreen
+        ? 14
+        : isHalfScreen
+            ? 12
+            : (diceCount == 1 ? 12 : (diceCount <= 4 ? 10 : 8));
+    final double spinnerSize = isFullScreen
+        ? 90
+        : isHalfScreen
+            ? 70
+            : (diceCount == 1 ? 70 : (diceCount <= 4 ? 50 : 35));
+    final double topSpacing = isFullScreen
+        ? 24
+        : isHalfScreen
+            ? 16
+            : (diceCount == 1 ? 16 : (diceCount <= 4 ? 8 : 6));
+    final double bottomSpacing = isFullScreen
+        ? 24
+        : isHalfScreen
+            ? 16
+            : (diceCount == 1 ? 16 : (diceCount <= 4 ? 8 : 6));
 
     return GestureDetector(
       onTap: diceProvider.isRolling ? null : () => diceProvider.rollAllDice(),
