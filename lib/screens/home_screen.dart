@@ -8,9 +8,17 @@ import 'number_dial_screen.dart';
 import 'spinner_wheel_screen.dart';
 import 'chess_timer_screen.dart';
 import 'settings_screen.dart';
+import 'games/games_menu_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  int _selectedSection = 0; // 0 = Randomizer Tools, 1 = Offline Games
 
   Widget _buildGridToolCard(
     BuildContext context, {
@@ -240,7 +248,9 @@ class HomeScreen extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            'Randomizer Tools',
+                            _selectedSection == 0
+                                ? 'Randomizer Tools'
+                                : 'Offline Games',
                             style: TextStyle(
                               fontSize: 14,
                               color: isDark
@@ -271,102 +281,225 @@ class HomeScreen extends StatelessWidget {
                   .fadeIn(duration: 400.ms)
                   .slideX(begin: -0.2, end: 0, duration: 400.ms),
 
-              // Tools Grid - 4x1 Layout for mobile (single column view)
-              Expanded(
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                  child: Column(
+              // Section Tabs
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? AppTheme.cardColor.withOpacity(0.5)
+                        : Colors.grey.shade200,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Row(
                     children: [
                       Expanded(
-                        child: _buildGridToolCard(
+                        child: _buildTabButton(
                           context,
-                          title: 'Dice Roller',
-                          description: 'Roll multiple dice',
-                          icon: Icons.casino_outlined,
-                          gradient: AppTheme.primaryGradient,
-                          screen: const DiceRollerScreen(),
-                          delay: 100,
+                          'Randomizer Tools',
+                          Icons.casino_outlined,
+                          0,
+                          isDark,
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(width: 4),
                       Expanded(
-                        child: _buildGridToolCard(
+                        child: _buildTabButton(
                           context,
-                          title: 'Chess Timer',
-                          description: 'Two-player timer',
-                          customIcon: _buildChessPieceIcon(),
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              const Color(0xFF8B5CF6),
-                              const Color(0xFF7C3AED),
-                            ],
-                          ),
-                          screen: const ChessTimerScreen(),
-                          delay: 200,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Expanded(
-                        child: _buildGridToolCard(
-                          context,
-                          title: 'Coin Flip',
-                          description: 'Heads or tails',
-                          icon: Icons.monetization_on_outlined,
-                          gradient: AppTheme.accentGradient,
-                          screen: const CoinFlipScreen(),
-                          delay: 300,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Expanded(
-                        child: _buildGridToolCard(
-                          context,
-                          title: 'Spinner Wheel',
-                          description: 'Quick random picks',
-                          customIcon: _buildSpinnerWheelIcon(),
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              const Color(0xFFFB7185),
-                              const Color(0xFFF59E0B),
-                            ],
-                          ),
-                          screen: SpinnerWheelScreen(),
-                          delay: 400,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Expanded(
-                        child: _buildGridToolCard(
-                          context,
-                          title: 'Random Number',
-                          description: 'Generate random',
-                          customIcon: _buildRandomNumberIcon(),
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              const Color(0xFF10B981),
-                              const Color(0xFF059669),
-                            ],
-                          ),
-                          screen: const NumberDialScreen(),
-                          delay: 500,
+                          'Offline Games',
+                          Icons.sports_esports_outlined,
+                          1,
+                          isDark,
                         ),
                       ),
                     ],
                   ),
                 ),
+              )
+                  .animate()
+                  .fadeIn(duration: 400.ms, delay: 50.ms)
+                  .slideY(begin: -0.2, end: 0, duration: 400.ms),
+
+              // Content Area
+              Expanded(
+                child: _selectedSection == 0
+                    ? _buildRandomizerTools(context, isDark)
+                    : _buildOfflineGames(context, isDark),
               ),
             ],
           ),
         ),
       ),
     );
+  }
+
+  Widget _buildTabButton(
+    BuildContext context,
+    String label,
+    IconData icon,
+    int index,
+    bool isDark,
+  ) {
+    final isSelected = _selectedSection == index;
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedSection = index;
+        });
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+        decoration: BoxDecoration(
+          gradient: isSelected
+              ? AppTheme.primaryGradient
+              : LinearGradient(
+                  colors: [
+                    Colors.transparent,
+                    Colors.transparent,
+                  ],
+                ),
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color:
+                        AppTheme.primaryGradient.colors.first.withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : [],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: 18,
+              color: isSelected
+                  ? Colors.white
+                  : isDark
+                      ? Colors.white60
+                      : Colors.grey.shade600,
+            ),
+            const SizedBox(width: 6),
+            Flexible(
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                  color: isSelected
+                      ? Colors.white
+                      : isDark
+                          ? Colors.white60
+                          : Colors.grey.shade600,
+                ),
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRandomizerTools(BuildContext context, bool isDark) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+      child: Column(
+        children: [
+          Expanded(
+            child: _buildGridToolCard(
+              context,
+              title: 'Dice Roller',
+              description: 'Roll multiple dice',
+              icon: Icons.casino_outlined,
+              gradient: AppTheme.primaryGradient,
+              screen: const DiceRollerScreen(),
+              delay: 100,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Expanded(
+            child: _buildGridToolCard(
+              context,
+              title: 'Chess Timer',
+              description: 'Two-player timer',
+              customIcon: _buildChessPieceIcon(),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  const Color(0xFF8B5CF6),
+                  const Color(0xFF7C3AED),
+                ],
+              ),
+              screen: const ChessTimerScreen(),
+              delay: 200,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Expanded(
+            child: _buildGridToolCard(
+              context,
+              title: 'Coin Flip',
+              description: 'Heads or tails',
+              icon: Icons.monetization_on_outlined,
+              gradient: AppTheme.accentGradient,
+              screen: const CoinFlipScreen(),
+              delay: 300,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Expanded(
+            child: _buildGridToolCard(
+              context,
+              title: 'Spinner Wheel',
+              description: 'Quick random picks',
+              customIcon: _buildSpinnerWheelIcon(),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  const Color(0xFFFB7185),
+                  const Color(0xFFF59E0B),
+                ],
+              ),
+              screen: SpinnerWheelScreen(),
+              delay: 400,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Expanded(
+            child: _buildGridToolCard(
+              context,
+              title: 'Random Number',
+              description: 'Generate random',
+              customIcon: _buildRandomNumberIcon(),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  const Color(0xFF10B981),
+                  const Color(0xFF059669),
+                ],
+              ),
+              screen: const NumberDialScreen(),
+              delay: 500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOfflineGames(BuildContext context, bool isDark) {
+    return const GamesMenuScreen();
   }
 }
 

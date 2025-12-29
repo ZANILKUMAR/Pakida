@@ -106,7 +106,7 @@ class SettingsScreen extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Pakida - Randomizer',
+                              'Pakida - Randomizer & Games',
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
@@ -147,7 +147,7 @@ class SettingsScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Pakida is a comprehensive randomizer toolkit designed to make decisions fun and fair. Whether you need to roll dice for games, flip a coin, spin a wheel, generate random numbers, or time chess matches, Pakida has you covered with beautiful animations and intuitive controls.',
+                    'Pakida is a comprehensive randomizer toolkit and gaming platform designed to make decisions fun and fair. Whether you need to roll dice for games, flip a coin, spin a wheel, generate random numbers, time chess matches, or enjoy classic arcade games, Pakida has you covered with beautiful animations, intuitive controls, and haptic feedback.',
                     style: TextStyle(
                       fontSize: 14,
                       height: 1.5,
@@ -158,7 +158,7 @@ class SettingsScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Features',
+                    'Randomizer Tools',
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
@@ -184,6 +184,60 @@ class SettingsScreen extends StatelessWidget {
                   ),
                   _buildFeatureItem(
                     '🔢 Random Number - Generate numbers in any range',
+                    isDark,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Offline Games (11 Games)',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: isDark ? Colors.white : AppTheme.backgroundColor,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  _buildFeatureItem(
+                    '🐍 Snake - Classic arcade snake game',
+                    isDark,
+                  ),
+                  _buildFeatureItem(
+                    '🧠 Memory Match - Card matching puzzle game',
+                    isDark,
+                  ),
+                  _buildFeatureItem(
+                    '🔢 2048 - Addictive number merging puzzle',
+                    isDark,
+                  ),
+                  _buildFeatureItem(
+                    '🔤 Number Puzzle - 15-tile sliding puzzle',
+                    isDark,
+                  ),
+                  _buildFeatureItem(
+                    '🧱 Brick Breaker - Paddle and ball arcade game',
+                    isDark,
+                  ),
+                  _buildFeatureItem(
+                    '🐦 Flappy Bird - Tap to fly through pipes',
+                    isDark,
+                  ),
+                  _buildFeatureItem(
+                    '🎨 Color Match - Fast-paced color recognition',
+                    isDark,
+                  ),
+                  _buildFeatureItem(
+                    '🏗️ Tower Builder - Stack blocks sky-high',
+                    isDark,
+                  ),
+                  _buildFeatureItem(
+                    '🏓 Ping Pong - Classic paddle game vs AI',
+                    isDark,
+                  ),
+                  _buildFeatureItem(
+                    '🎯 Tap the Dot - Quick reflexes challenge',
+                    isDark,
+                  ),
+                  _buildFeatureItem(
+                    '🧮 Quick Math - Speed arithmetic game',
                     isDark,
                   ),
                   const SizedBox(height: 16),
